@@ -2,5 +2,15 @@
   "extends": "./tsconfig.base.json",
   "compileOnSave": false,
   "files": [],
-  "references": []
+  "references": [
+    {
+      "path": "./packages/rpc-server"
+    },
+    {
+      "path": "./packages/rpc-client"
+    },
+    {
+      "path": "./packages/rpc-server-nestjs"
+    }
+  ]
 }
