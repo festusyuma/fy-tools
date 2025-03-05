@@ -15,7 +15,7 @@ export type StripSlashes<T> = T extends string
 
 export type RoutePath<TB, T> = T extends string
   ? TB extends string
-    ? `${StripSlashes<TB>}/${StripSlashes<T>}`
+    ? StripSlashes<`${StripSlashes<TB>}/${StripSlashes<T>}`>
     : StripSlashes<T>
   : never;
 

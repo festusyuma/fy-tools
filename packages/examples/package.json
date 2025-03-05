@@ -1,0 +1,13 @@
+{
+  "name": "@fy-tools/examples",
+  "version": "0.0.102",
+  "private": true,
+  "exports": {
+    "./package.json": "./package.json"
+  },
+  "dependencies": {
+    "@fy-tools/rpc-client": "0.0.102",
+    "@fy-tools/rpc-server": "0.0.102",
+    "@fy-tools/rpc-server-nestjs": "0.0.102"
+  }
+}

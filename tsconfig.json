@@ -11,6 +11,12 @@
     },
     {
       "path": "./packages/rpc-server-nestjs"
+    },
+    {
+      "path": "./packages/examples"
+    },
+    {
+      "path": "./packages/test"
     }
   ]
 }
