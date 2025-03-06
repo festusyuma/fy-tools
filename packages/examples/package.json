@@ -1,6 +1,7 @@
 {
   "name": "@fy-tools/examples",
   "version": "0.0.102",
+  "repository": "https://github.com/festusyuma/fy-tools",
   "private": true,
   "exports": {
     "./package.json": "./package.json"
