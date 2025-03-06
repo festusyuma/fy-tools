@@ -15,13 +15,13 @@ export const HttpMethod = {
 export type HttpMethod = (typeof HttpMethod)[keyof typeof HttpMethod];
 
 export const methods = {
-  [HttpMethod.GET]: '$get',
-  [HttpMethod.POST]: '$post',
-  [HttpMethod.PUT]: '$put',
-  [HttpMethod.DELETE]: '$delete',
-  [HttpMethod.PATCH]: '$patch',
-  [HttpMethod.ALL]: '$all',
-  [HttpMethod.OPTIONS]: '$options',
-  [HttpMethod.HEAD]: '$head',
-  [HttpMethod.SEARCH]: '$search',
+  [HttpMethod.GET]: 'get',
+  [HttpMethod.POST]: 'post',
+  [HttpMethod.PUT]: 'put',
+  [HttpMethod.DELETE]: 'delete',
+  [HttpMethod.PATCH]: 'patch',
+  [HttpMethod.ALL]: 'all',
+  [HttpMethod.OPTIONS]: 'options',
+  [HttpMethod.HEAD]: 'head',
+  [HttpMethod.SEARCH]: 'search',
 } as const;

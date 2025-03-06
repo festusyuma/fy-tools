@@ -1,18 +1,16 @@
-import type { TypeOf, ZodObject, ZodRawShape } from 'zod';
+import { encode } from 'node:querystring';
 
 import type { App, Controller, Route } from '@fy-tools/rpc-server';
-import { HttpMethod, methods } from './constants.js';
-
-type ParseSchema<T> = T extends ZodObject<ZodRawShape> ? TypeOf<T> : never;
-
-type StripNever<T> = {
-  [K in keyof T as T[K] extends never ? never : K]: T[K];
-};
-
-type IsRoutePath<T, TP extends string> = T extends Route<TP> ? T : never;
-type IsRouteMethod<T, TM extends HttpMethod> = T extends Route<infer P, TM>
-  ? T
-  : never;
+import { methods } from './constants.js';
+import type {
+  FetcherOptions,
+  IsRouteMethod,
+  IsRoutePath,
+  ParseSchema,
+  RpcClientOptions,
+  StripNever,
+} from './types';
+import Axios, { type AxiosResponse } from 'axios';
 
 type Payload<R extends Route> = StripNever<{
   body: ParseSchema<R['_body']>;
@@ -20,30 +18,47 @@ type Payload<R extends Route> = StripNever<{
   query: ParseSchema<R['_query']>;
 }>;
 
-export function rpcClient<T extends App<Controller<any, any>[]>>() {
+export function rpcClient<T extends App<Controller<any, any>[]>>(
+  options?: RpcClientOptions
+) {
   type Controllers = T['_controllers'][number];
   type Routes = Controllers['_routes'][number];
 
-  return <TPath extends Routes['_path']>(path: TPath) => {
+  const axios = Axios.create({
+    baseURL: options?.baseUrl,
+  });
+
+  return <TPath extends Routes['_path']>(url: TPath) => {
     type PRoute = IsRoutePath<Routes, TPath>;
 
-    async function req(method: HttpMethod, payload: unknown): Promise<unknown> {
-      console.log(method, path, payload);
-      // todo
-      //  Format query and params.
-      //  Implement api call here
-      return {};
+    async function req<Response>(
+      method: string,
+      payload?: any,
+      options?: FetcherOptions
+    ) {
+      // todo parse url with params
+
+      return axios.request<Response>({
+        url: url + `?${encode(payload?.query ?? {})}`,
+        method,
+        data: payload?.body,
+        ...(options ?? {}),
+      });
     }
 
     return Object.fromEntries(
       Object.entries(methods).map((p) => [
         p[1],
-        (payload: unknown) => req(p[1], payload)
+        (payload?: unknown, options?: FetcherOptions) =>
+          req(p[1], payload, options),
       ])
     ) as {
-      [key in (typeof methods)[PRoute['method']]]: (
-        payload: Payload<IsRouteMethod<PRoute, key>>
-      ) => Promise<ParseSchema<IsRouteMethod<PRoute, key>['_response']>>;
+      [key in PRoute['method']]: (
+        payload: Payload<IsRouteMethod<PRoute, key>>,
+        options?: FetcherOptions
+      ) => Promise<
+        AxiosResponse<ParseSchema<IsRouteMethod<PRoute, key>['_response']>>
+      >;
     };
   };
 }
