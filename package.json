@@ -16,11 +16,12 @@
     "@types/node": "18.16.9",
     "eslint": "^9.8.0",
     "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-simple-import-sort": "^12.1.1",
     "nx": "20.4.6",
     "prettier": "^2.6.2",
     "tslib": "^2.3.0",
-    "typescript": "~5.7.2",
-    "typescript-eslint": "^8.19.0",
+    "typescript": "~5.8.2",
+    "typescript-eslint": "^8.26.0",
     "verdaccio": "^5.0.4"
   },
   "workspaces": [

@@ -1,10 +1,9 @@
-import { applyDecorators, Controller as N_Controller } from '@nestjs/common';
-
 import {
   Controller as _Controller,
   Route,
   stripSlashes,
 } from '@fy-tools/rpc-server';
+import { applyDecorators, Controller as N_Controller } from '@nestjs/common';
 
 export class Controller<
   BTPath extends string | undefined = any,

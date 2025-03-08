@@ -1,6 +1,9 @@
 import { encode } from 'node:querystring';
 
 import type { App, Controller, Route } from '@fy-tools/rpc-server';
+import Axios, { AxiosError, type AxiosResponse } from 'axios';
+
+import { AppError } from './app-error';
 import { methods } from './constants.js';
 import type {
   FetcherOptions,
@@ -10,7 +13,6 @@ import type {
   RpcClientOptions,
   StripNever,
 } from './types';
-import Axios, { type AxiosResponse } from 'axios';
 
 type Payload<R extends Route> = StripNever<{
   body: ParseSchema<R['_body']>;
@@ -36,19 +38,26 @@ export function rpcClient<T extends App<Controller<any, any>[]>>(
       payload?: any,
       options?: FetcherOptions
     ) {
-      // todo parse url with params
-
-      return axios.request<Response>({
-        url: url + `?${encode(payload?.query ?? {})}`,
-        method,
-        data: payload?.body,
-        ...(options ?? {}),
+      const parsedUrl = (url as string).replace(/:\w+/g, (match) => {
+        const param = payload?.params?.[match.slice(1)];
+        return param ?? match;
       });
+
+      try {
+        return await axios.request<Response>({
+          url: parsedUrl + `?${encode(payload?.query ?? {})}`,
+          method,
+          data: payload?.body,
+          ...(options ?? {}),
+        });
+      } catch (e) {
+        throw new AppError(e as AxiosError);
+      }
     }
 
     return Object.fromEntries(
       Object.entries(methods).map((p) => [
-        p[1],
+        p[0],
         (payload?: unknown, options?: FetcherOptions) =>
           req(p[1], payload, options),
       ])

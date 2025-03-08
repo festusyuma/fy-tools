@@ -1,29 +1,33 @@
-import { rpcClient } from '@fy-tools/rpc-client';
-import type { NestApp } from '../server-nestjs';
+import { addUser, type AddUserPayload, AppError } from './client';
 
-const client = rpcClient<NestApp>({
-  /** Use axios instance options here */
-  baseUrl: 'https://example.com',
-});
+const data: AddUserPayload = {
+  body: { name: 'Festus' },
+};
 
-client('user')
+addUser(
   /** Type safe payload */
-  .$post(
-    { body: { name: 'Festus' } },
-    {
-      /** Use axios request options here */
-      headers: {},
-    },
-  )
+  data,
+  {
+    /** Use axios request options here */
+    headers: {},
+  }
+)
   .then((res) => {
     /** Type safe response */
     console.log('res :: ', res.data);
-  });
+  })
+  .catch((e: AppError) => {
+    /** Error types are inferred based on status */
 
-client('user')
-  /** Type safe payload */
-  .$get({})
-  .then((res) => {
-    /** Type safe response */
-    console.log('res :: ', res.data);
+    e.Status(400)?.Error((err) => {
+      console.error("errors occurred :: ", err.errors.join(', '))
+    });
+
+    e.Status(401)?.Error((err) => {
+      console.error("unauthorized error :: ", err.error)
+    });
+
+    e.Status(0)?.Error(() => {
+      console.error("unknown error :: ", e.error.message)
+    });
   });

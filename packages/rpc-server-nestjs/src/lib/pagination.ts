@@ -1,6 +1,5 @@
-import { createParamDecorator, ExecutionContext } from '@nestjs/common';
-
 import {PaginationData} from "@fy-tools/rpc-server";
+import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 
 export const Pagination = createParamDecorator(
   (data: unknown, ctx: ExecutionContext): PaginationData => {

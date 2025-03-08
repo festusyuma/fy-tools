@@ -9,6 +9,11 @@
   "dependencies": {
     "@fy-tools/rpc-client": "0.0.102",
     "@fy-tools/rpc-server": "0.0.102",
-    "@fy-tools/rpc-server-nestjs": "0.0.102"
+    "@fy-tools/rpc-server-nestjs": "0.0.102",
+    "react": "^19.0.0",
+    "swr": "^2.3.3"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.10"
   }
 }
