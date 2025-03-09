@@ -6,11 +6,11 @@ import Axios, {
   type AxiosRequestConfig,
   type AxiosResponse,
 } from 'axios';
+import type { TypeOf, ZodObject, ZodRawShape } from 'zod';
 
 import { AppError } from './app-error';
 import { methods } from './constants.js';
 import type { RpcClientOptions } from './types';
-import type { TypeOf, ZodObject, ZodRawShape } from 'zod';
 
 type ParseSchema<T> = T extends ZodObject<ZodRawShape> ? TypeOf<T> : never;
 
