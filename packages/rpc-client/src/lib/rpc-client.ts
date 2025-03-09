@@ -1,5 +1,3 @@
-import { encode } from 'node:querystring';
-
 import type { App, Controller, Route } from '@fy-tools/rpc-server';
 import Axios, {
   AxiosError,
@@ -47,9 +45,13 @@ export function rpcClient<
       return param ?? match;
     });
 
+    const queryString = Object.entries(payload?.query ?? {})
+      .map((q) => `${q[0]}=${q[1]}`)
+      .join('&');
+
     try {
       return await axios.request({
-        url: parsedUrl + `?${encode(payload?.query ?? {})}`,
+        url: parsedUrl + '?' + queryString,
         method,
         data: payload?.body,
         ...(options ?? {}),
@@ -82,9 +84,7 @@ export function rpcClient<
       [key in PRoute<TPath>['method']]: (
         payload: Payload<MRoute<TPath, key>>,
         options?: FetcherOptions
-      ) => Promise<
-        AxiosResponse<ParseSchema<MRoute<TPath, key>['_response']>>
-      >;
+      ) => Promise<AxiosResponse<ParseSchema<MRoute<TPath, key>['_response']>>>;
     };
   };
 }
