@@ -1,15 +1,15 @@
 {
   "name": "@fy-tools/examples",
-  "version": "0.0.105",
+  "version": "0.0.106",
   "repository": "https://github.com/festusyuma/fy-tools",
   "private": true,
   "exports": {
     "./package.json": "./package.json"
   },
   "dependencies": {
-    "@fy-tools/rpc-client": "0.0.105",
-    "@fy-tools/rpc-server": "0.0.105",
-    "@fy-tools/rpc-server-nestjs": "0.0.105",
+    "@fy-tools/rpc-client": "0.0.106",
+    "@fy-tools/rpc-server": "0.0.106",
+    "@fy-tools/rpc-server-nestjs": "0.0.106",
     "react": "^19.0.0",
     "swr": "^2.3.3"
   },
