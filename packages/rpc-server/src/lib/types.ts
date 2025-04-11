@@ -1,9 +1,4 @@
-import type {
-  TypeOf,
-  ZodFirstPartySchemaTypes,
-  ZodObject,
-  ZodRawShape,
-} from 'zod';
+import type { output,ZodInterface } from 'zod';
 
 import type { Route } from './route.js';
 
@@ -19,17 +14,17 @@ export type RoutePath<TB, T> = T extends string
     : StripSlashes<T>
   : never;
 
-export type PropertyKey<T> = T extends ZodObject<ZodRawShape>
-  ? keyof T['shape']
+export type PropertyKey<T> = T extends ZodInterface
+  ? keyof T['_zod']['shape']
   : never;
 
 type RouteIn<
   T,
   TP extends PropertyKey<T> | undefined = undefined
-> = T extends ZodFirstPartySchemaTypes
+> = T extends ZodInterface
   ? TP extends PropertyKey<T>
-    ? TypeOf<T>[TP]
-    : TypeOf<T>
+    ? output<T>[TP]
+    : output<T>
   : never;
 
 export type Body<
@@ -46,5 +41,3 @@ export type Params<
   T extends Route,
   TK extends PropertyKey<T['_params']> | undefined = undefined
 > = RouteIn<T['_params'], TK>;
-
-

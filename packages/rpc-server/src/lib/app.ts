@@ -1,4 +1,4 @@
-import type { ZodObject, ZodRawShape } from 'zod';
+import type { ZodInterface } from 'zod';
 
 import type { Controller } from './controller.js';
 
@@ -9,7 +9,7 @@ type MergeController<
 
 export class App<
   T extends Controller[] = never[],
-  TE extends { [k in number]: ZodObject<ZodRawShape> } = {
+  TE extends { [k in number]: ZodInterface } = {
     [key in never]: never;
   }
 > {
@@ -26,13 +26,13 @@ export class App<
     return app;
   }
 
-  error<Status extends number, Body extends ZodRawShape>(
+  error<Status extends number, Body extends ZodInterface>(
     status: Status,
     error: Body
   ) {
     const app = this as unknown as App<
       T,
-      TE & { [key in Status]: ZodObject<Body> }
+      TE & { [key in Status]: Body }
     >;
 
     app._errors = { ...app._errors, [status]: error };

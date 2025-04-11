@@ -23,6 +23,6 @@
   },
   "peerDependencies": {
     "@fy-tools/rpc-server": "0.0.105",
-    "zod": "^3.24.2"
+    "zod": "4.0.0-beta.20250411T005215"
   }
 }

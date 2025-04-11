@@ -1,6 +1,6 @@
 import type { App } from '@fy-tools/rpc-server';
 import type { AxiosResponse } from 'axios';
-import type { TypeOf, ZodObject, ZodRawShape } from 'zod';
+import type { output, ZodInterface } from 'zod';
 
 export type RpcClientOptions = {
   baseUrl?: string;
@@ -20,8 +20,8 @@ export type InferOptions<T extends ApiRouteFunction> =
 
 export type InferError<T> = T extends App<any, infer Error>
   ? {
-      [key in keyof Error]: Error[key] extends ZodObject<ZodRawShape>
-        ? TypeOf<Error[key]>
+      [key in keyof Error]: Error[key] extends ZodInterface
+        ? output<Error[key]>
         : never;
     }
   : never;

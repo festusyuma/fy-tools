@@ -1,4 +1,4 @@
-import { z, ZodObject, ZodRawShape } from 'zod';
+import { z, ZodInterface } from 'zod';
 
 import { type StripSlashes } from './types.js';
 import { HttpMethod } from './util/constants.js';
@@ -11,10 +11,10 @@ export const ApiSuccessSchema = z.object({
 export class Route<
   TPath extends string = any,
   TMethod extends HttpMethod = any,
-  TResponse extends ZodObject<ZodRawShape> | unknown = unknown,
-  TBody extends ZodObject<ZodRawShape> | unknown = unknown,
-  TParams extends ZodObject<ZodRawShape> | unknown = unknown,
-  TQuery extends ZodObject<ZodRawShape> | unknown = unknown,
+  TResponse extends ZodInterface | unknown = unknown,
+  TBody extends ZodInterface | unknown = unknown,
+  TParams extends ZodInterface | unknown = unknown,
+  TQuery extends ZodInterface | unknown = unknown,
   TAuth extends boolean = false
 > {
   _path: StripSlashes<TPath>;
@@ -28,53 +28,49 @@ export class Route<
     this._path = stripSlashes(path);
   }
 
-  body<T extends ZodRawShape>(_schema: T) {
-    const schema = z.object(_schema);
-
+  body<T extends ZodInterface>(_schema: T) {
     const route = this as unknown as Route<
       TPath,
       TMethod,
       TResponse,
-      ZodObject<T>,
+      T,
       TParams,
       TQuery,
       TAuth
     >;
 
-    route._body = schema;
+    route._body = _schema;
     return route;
   }
 
-  params<T extends ZodRawShape>(_schema: T) {
-    const schema = z.object(_schema);
+  params<T extends ZodInterface>(_schema: T) {
     const route = this as unknown as Route<
       TPath,
       TMethod,
       TResponse,
       TBody,
-      ZodObject<T>,
+      T,
       TQuery,
       TAuth
     >;
 
-    route._params = schema;
+    route._params = _schema;
 
     return route;
   }
 
-  query<T extends ZodRawShape>(_schema: T) {
-    const schema = z.object(_schema);
+  query<T extends ZodInterface>(_schema: T) {
     const route = this as unknown as Route<
       TPath,
       TMethod,
       TResponse,
       TBody,
       TParams,
-      ZodObject<T>,
+      T,
       TAuth
     >;
 
-    route._query = schema;
+    route._query = _schema;
     return route;
   }
 
@@ -94,19 +90,18 @@ export class Route<
     return route;
   }
 
-  response<T extends ZodRawShape>(_schema: T) {
-    const schema = z.object(_schema);
+  response<T extends ZodInterface>(_schema: T) {
     const route = this as unknown as Route<
       TPath,
       TMethod,
-      ZodObject<T>,
+      T,
       TBody,
       TParams,
       TQuery,
       TAuth
     >;
 
-    route._response = schema;
+    route._response = _schema;
     return route;
   }
 }

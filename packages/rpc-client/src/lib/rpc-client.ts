@@ -4,17 +4,17 @@ import Axios, {
   type AxiosRequestConfig,
   type AxiosResponse,
 } from 'axios';
-import type { TypeOf, ZodObject, ZodRawShape } from 'zod';
+import type { output, ZodInterface } from 'zod';
 
 import { AppError } from './app-error';
 import { methods } from './constants.js';
 import type { RpcClientOptions } from './types';
 
-type ParseSchema<T> = T extends ZodObject<ZodRawShape> ? TypeOf<T> : never;
+type ParseSchema<T> = T extends ZodInterface ? output<T> : never;
 
 type IsRoutePath<T, TP extends string> = T extends Route<TP> ? T : never;
 type IsRouteMethod<T, TM extends string> = TM extends keyof typeof methods
-  ? T extends Route<infer P, TM>
+  ? T extends Route<infer _, TM>
     ? T
     : never
   : never;
