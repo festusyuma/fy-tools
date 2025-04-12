@@ -17,10 +17,7 @@ export class Controller<
     const controller = super.route(route);
     type controller = typeof controller;
 
-    return this as unknown as Controller<
-      BTPath,
-      controller['_routes']
-    >;
+    return this as unknown as Controller<BTPath, controller['_routes']>;
   }
 
   get Controller() {

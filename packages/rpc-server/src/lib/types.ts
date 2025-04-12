@@ -1,4 +1,4 @@
-import type { output,ZodInterface } from 'zod';
+import * as z from 'zod';
 
 import type { Route } from './route.js';
 
@@ -14,17 +14,17 @@ export type RoutePath<TB, T> = T extends string
     : StripSlashes<T>
   : never;
 
-export type PropertyKey<T> = T extends ZodInterface
+export type PropertyKey<T> = T extends z.ZodInterface
   ? keyof T['def']['shape']
   : never;
 
 type RouteIn<
   T,
   TP extends PropertyKey<T> | undefined = undefined
-> = T extends ZodInterface
+> = T extends z.ZodInterface
   ? TP extends PropertyKey<T>
-    ? output<T>[TP]
-    : output<T>
+    ? z.output<T>[TP]
+    : z.output<T>
   : never;
 
 export type Body<

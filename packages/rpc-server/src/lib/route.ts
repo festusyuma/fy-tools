@@ -1,4 +1,4 @@
-import { z, ZodInterface } from 'zod';
+import { ZodInterface } from 'zod';
 
 import { type StripSlashes } from './types.js';
 import { HttpMethod } from './util/constants.js';
@@ -7,17 +7,17 @@ import { stripSlashes } from './util/strip-slashes.js';
 export class Route<
   TPath extends string = any,
   TMethod extends HttpMethod = any,
-  TResponse = never,
-  TBody = never,
-  TParams = never,
-  TQuery = never,
+  TResponse extends ZodInterface | unknown = unknown,
+  TBody extends ZodInterface | unknown = unknown,
+  TParams extends ZodInterface | unknown = unknown,
+  TQuery extends ZodInterface | unknown = unknown,
   TAuth extends boolean = false
 > {
   _path: StripSlashes<TPath>;
-  _response: ZodInterface | undefined;
-  _params: ZodInterface | undefined;
-  _query: ZodInterface | undefined;
-  _body: ZodInterface | undefined;
+  _response: TResponse | undefined;
+  _params: TParams | undefined;
+  _query: TQuery | undefined;
+  _body: TBody | undefined;
   _authorized = false as TAuth;
 
   constructor(path: TPath, public method: TMethod) {
@@ -29,7 +29,7 @@ export class Route<
       TPath,
       TMethod,
       TResponse,
-      z.output<T>,
+      T,
       TParams,
       TQuery,
       TAuth
@@ -45,7 +45,7 @@ export class Route<
       TMethod,
       TResponse,
       TBody,
-      z.output<T>,
+      T,
       TQuery,
       TAuth
     >;
@@ -62,7 +62,7 @@ export class Route<
       TResponse,
       TBody,
       TParams,
-      z.output<T>,
+      T,
       TAuth
     >;
 
@@ -90,7 +90,7 @@ export class Route<
     const route = this as unknown as Route<
       TPath,
       TMethod,
-      z.output<T>,
+      T,
       TBody,
       TParams,
       TQuery,

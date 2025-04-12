@@ -1,58 +1,9 @@
-import type { App, Controller, Route } from '@fy-tools/rpc-server';
-import Axios, {
-  AxiosError,
-  type AxiosRequestConfig,
-  type AxiosResponse,
-} from 'axios';
+import type { App, Controller } from '@fy-tools/rpc-server';
+import Axios, { AxiosError, type AxiosRequestConfig } from 'axios';
 
 import { AppError } from './app-error';
 import { methods } from './constants.js';
-import type { RpcClientOptions } from './types';
-
-type StripNever<T> = {
-  [K in keyof T as T[K] extends never ? never : K]: T[K];
-};
-
-type IsRoutePath<T extends Route, TP extends string> = T extends Route<TP>
-  ? T
-  : never;
-
-type IsRouteMethod<
-  T extends Route,
-  TM extends string
-> = TM extends keyof typeof methods
-  ? T extends Route<any, TM>
-    ? T
-    : never
-  : never;
-
-type Payload<R> = R extends Route<
-  any,
-  any,
-  any,
-  infer Body,
-  infer Params,
-  infer Query
->
-  ? StripNever<{
-      body: Body;
-      params: Params;
-      query: Query;
-    }>
-  : never;
-
-type Response<R> = R extends Route<any, any, infer Response> ? Response : any;
-
-type Client<R extends Route> = {
-  [key in R['method']]: <
-    TMethodRoute extends IsRouteMethod<R, key>,
-    TPayload extends Payload<TMethodRoute>,
-    TResponse extends Response<TMethodRoute>
-  >(
-    payload: TPayload,
-    options?: Omit<AxiosRequestConfig<TPayload>, 'method' | 'data'>
-  ) => Promise<AxiosResponse<TResponse>>;
-};
+import type { Client, RpcClientOptions } from './types';
 
 export function rpcClient<T extends App<Controller<any, any>[]>>(
   options?: RpcClientOptions
@@ -90,16 +41,13 @@ export function rpcClient<T extends App<Controller<any, any>[]>>(
     }
   }
 
-  return function client<
-    TPath extends Routes['_path'],
-    TRoute extends IsRoutePath<Routes, TPath>
-  >(url: TPath): Client<TRoute> {
+  return function client(url: string) {
     return Object.fromEntries(
       Object.entries(methods).map((p) => [
         p[0],
         (payload?: unknown, options?: AxiosRequestConfig) =>
           req(url, p[1], payload, options),
       ])
-    ) as Client<TRoute>;
-  };
+    );
+  } as Client<Routes>;
 }

@@ -1,4 +1,4 @@
-import { HttpMethod, Route as _Route } from '@fy-tools/rpc-server';
+import { HttpMethod, PropertyKey,Route as _Route } from '@fy-tools/rpc-server';
 import {
   All,
   applyDecorators,
@@ -21,17 +21,17 @@ import {
   ApiQuery,
   ApiResponse,
 } from '@nestjs/swagger';
-import { toJSONSchema, z,ZodInterface } from 'zod';
+import { toJSONSchema, ZodInterface } from 'zod';
 
 import { ZodFilter } from './util/zod-filter';
 
 export class Route<
   TPath extends string,
   TMethod extends HttpMethod,
-  TResponse = never,
-  TBody = never,
-  TParams = never,
-  TQuery = never,
+  TResponse extends ZodInterface = never,
+  TBody extends ZodInterface = never,
+  TParams extends ZodInterface = never,
+  TQuery extends ZodInterface = never,
   TAuth extends boolean = false
 > extends _Route<TPath, TMethod, TResponse, TBody, TParams, TQuery, TAuth> {
   _decorators = [] as Array<
@@ -61,7 +61,7 @@ export class Route<
       TPath,
       TMethod,
       TResponse,
-      z.output<T>,
+      T,
       TParams,
       TQuery,
       TAuth
@@ -88,7 +88,7 @@ export class Route<
       TMethod,
       TResponse,
       TBody,
-      z.output<T>,
+      T,
       TQuery,
       TAuth
     >;
@@ -114,7 +114,7 @@ export class Route<
       TResponse,
       TBody,
       TParams,
-      z.output<T>,
+      T,
       TAuth
     >;
   }
@@ -148,7 +148,7 @@ export class Route<
     return this as unknown as Route<
       TPath,
       TMethod,
-      z.output<T>,
+      T,
       TBody,
       TParams,
       TQuery,
@@ -161,9 +161,9 @@ export class Route<
   }
 
   get Param() {
-    type ParamKey = Extract<TParams, string>;
+    type Key = PropertyKey<TParams> | undefined;
 
-    return createParamDecorator((data: ParamKey, ctx: ExecutionContext) => {
+    return createParamDecorator((data: Key, ctx: ExecutionContext) => {
       const paramsData = ctx.switchToHttp().getRequest().params;
       if (this._params instanceof ZodInterface) {
         return data
@@ -177,9 +177,9 @@ export class Route<
   }
 
   get Query() {
-    type QueryKey = Extract<TQuery, string>;
+    type Key = PropertyKey<TQuery> | undefined;
 
-    return createParamDecorator((data: QueryKey, ctx: ExecutionContext) => {
+    return createParamDecorator((data: Key, ctx: ExecutionContext) => {
       const queries = ctx.switchToHttp().getRequest().query;
 
       if (this._query instanceof ZodInterface) {
@@ -194,9 +194,9 @@ export class Route<
   }
 
   get Body() {
-    type BodyKey = Extract<TBody, string>;
+    type Key = PropertyKey<TBody> | undefined;
 
-    return createParamDecorator((data: BodyKey, ctx: ExecutionContext) => {
+    return createParamDecorator((data: Key, ctx: ExecutionContext) => {
       const payload = ctx.switchToHttp().getRequest().body;
       if (this._body instanceof ZodInterface) {
         return data
