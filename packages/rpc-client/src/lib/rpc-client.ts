@@ -4,31 +4,60 @@ import Axios, {
   type AxiosRequestConfig,
   type AxiosResponse,
 } from 'axios';
-import type { output, ZodInterface } from 'zod';
 
 import { AppError } from './app-error';
 import { methods } from './constants.js';
 import type { RpcClientOptions } from './types';
 
-type ParseSchema<T> = T extends ZodInterface ? output<T> : never;
-
-type IsRoutePath<T, TP extends string> = T extends Route<TP> ? T : never;
-type IsRouteMethod<T, TM extends string> = TM extends keyof typeof methods
-  ? T extends Route<infer _, TM>
-    ? T
-    : never
-  : never;
-
 type StripNever<T> = {
   [K in keyof T as T[K] extends never ? never : K]: T[K];
 };
 
-export function rpcClient<
-  T extends App<Controller<any, any>[]>,
-  FetcherOptions = Omit<AxiosRequestConfig<T>, 'method' | 'data'>
->(options?: RpcClientOptions) {
-  type Controllers = T['_controllers'][number];
-  type Routes = Controllers['_routes'][number];
+type IsRoutePath<T extends Route, TP extends string> = T extends Route<TP>
+  ? T
+  : never;
+
+type IsRouteMethod<
+  T extends Route,
+  TM extends string
+> = TM extends keyof typeof methods
+  ? T extends Route<any, TM>
+    ? T
+    : never
+  : never;
+
+type Payload<R> = R extends Route<
+  any,
+  any,
+  any,
+  infer Body,
+  infer Params,
+  infer Query
+>
+  ? StripNever<{
+      body: Body;
+      params: Params;
+      query: Query;
+    }>
+  : never;
+
+type Response<R> = R extends Route<any, any, infer Response> ? Response : any;
+
+type Client<R extends Route> = {
+  [key in R['method']]: <
+    TMethodRoute extends IsRouteMethod<R, key>,
+    TPayload extends Payload<TMethodRoute>,
+    TResponse extends Response<TMethodRoute>
+  >(
+    payload: TPayload,
+    options?: Omit<AxiosRequestConfig<TPayload>, 'method' | 'data'>
+  ) => Promise<AxiosResponse<TResponse>>;
+};
+
+export function rpcClient<T extends App<Controller<any, any>[]>>(
+  options?: RpcClientOptions
+) {
+  type Routes = T['_controllers'][number]['_routes'][number];
 
   const axios = Axios.create({
     baseURL: options?.baseUrl,
@@ -38,7 +67,7 @@ export function rpcClient<
     url: string,
     method: string,
     payload?: any,
-    options?: FetcherOptions
+    options?: AxiosRequestConfig
   ) {
     const parsedUrl = (url as string).replace(/:\w+/g, (match) => {
       const param = payload?.params?.[match.slice(1)];
@@ -61,30 +90,16 @@ export function rpcClient<
     }
   }
 
-  type Payload<R extends Route> = StripNever<{
-    body: ParseSchema<R['_body']>;
-    params: ParseSchema<R['_params']>;
-    query: ParseSchema<R['_query']>;
-  }>;
-
-  type PRoute<TPath extends string> = IsRoutePath<Routes, TPath>;
-  type MRoute<TPath extends string, M extends string> = IsRouteMethod<
-    PRoute<TPath>,
-    M
-  >;
-
-  return <TPath extends Routes['_path'] & string>(url: TPath) => {
+  return function client<
+    TPath extends Routes['_path'],
+    TRoute extends IsRoutePath<Routes, TPath>
+  >(url: TPath): Client<TRoute> {
     return Object.fromEntries(
       Object.entries(methods).map((p) => [
         p[0],
-        (payload?: unknown, options?: FetcherOptions) =>
+        (payload?: unknown, options?: AxiosRequestConfig) =>
           req(url, p[1], payload, options),
       ])
-    ) as {
-      [key in PRoute<TPath>['method']]: (
-        payload: Payload<MRoute<TPath, key>>,
-        options?: FetcherOptions
-      ) => Promise<AxiosResponse<ParseSchema<MRoute<TPath, key>['_response']>>>;
-    };
+    ) as Client<TRoute>;
   };
 }

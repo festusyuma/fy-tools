@@ -15,7 +15,7 @@ export type RoutePath<TB, T> = T extends string
   : never;
 
 export type PropertyKey<T> = T extends ZodInterface
-  ? keyof T['_zod']['shape']
+  ? keyof T['def']['shape']
   : never;
 
 type RouteIn<

@@ -4,24 +4,20 @@ import { type StripSlashes } from './types.js';
 import { HttpMethod } from './util/constants.js';
 import { stripSlashes } from './util/strip-slashes.js';
 
-export const ApiSuccessSchema = z.object({
-  success: z.boolean().default(true),
-});
-
 export class Route<
   TPath extends string = any,
   TMethod extends HttpMethod = any,
-  TResponse extends ZodInterface | unknown = unknown,
-  TBody extends ZodInterface | unknown = unknown,
-  TParams extends ZodInterface | unknown = unknown,
-  TQuery extends ZodInterface | unknown = unknown,
+  TResponse = never,
+  TBody = never,
+  TParams = never,
+  TQuery = never,
   TAuth extends boolean = false
 > {
   _path: StripSlashes<TPath>;
-  _response = z.null() as TResponse;
-  _params = z.never() as TParams;
-  _query = z.never() as TQuery;
-  _body = z.never() as TBody;
+  _response: ZodInterface | undefined;
+  _params: ZodInterface | undefined;
+  _query: ZodInterface | undefined;
+  _body: ZodInterface | undefined;
   _authorized = false as TAuth;
 
   constructor(path: TPath, public method: TMethod) {
@@ -33,7 +29,7 @@ export class Route<
       TPath,
       TMethod,
       TResponse,
-      T,
+      z.output<T>,
       TParams,
       TQuery,
       TAuth
@@ -49,7 +45,7 @@ export class Route<
       TMethod,
       TResponse,
       TBody,
-      T,
+      z.output<T>,
       TQuery,
       TAuth
     >;
@@ -66,7 +62,7 @@ export class Route<
       TResponse,
       TBody,
       TParams,
-      T,
+      z.output<T>,
       TAuth
     >;
 
@@ -94,7 +90,7 @@ export class Route<
     const route = this as unknown as Route<
       TPath,
       TMethod,
-      T,
+      z.output<T>,
       TBody,
       TParams,
       TQuery,

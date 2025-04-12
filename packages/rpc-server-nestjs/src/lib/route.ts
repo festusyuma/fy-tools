@@ -1,8 +1,4 @@
-import {
-  HttpMethod,
-  type PropertyKey,
-  Route as _Route,
-} from '@fy-tools/rpc-server';
+import { HttpMethod, Route as _Route } from '@fy-tools/rpc-server';
 import {
   All,
   applyDecorators,
@@ -25,17 +21,17 @@ import {
   ApiQuery,
   ApiResponse,
 } from '@nestjs/swagger';
-import { toJSONSchema, ZodInterface } from 'zod';
+import { toJSONSchema, ZodInterface, z } from 'zod';
 
 import { ZodFilter } from './util/zod-filter';
 
 export class Route<
-  TPath extends string = any,
-  TMethod extends HttpMethod = any,
-  TResponse extends ZodInterface | unknown = unknown,
-  TBody extends ZodInterface | unknown = unknown,
-  TParams extends ZodInterface | unknown = unknown,
-  TQuery extends ZodInterface | unknown = unknown,
+  TPath extends string,
+  TMethod extends HttpMethod,
+  TResponse = never,
+  TBody = never,
+  TParams = never,
+  TQuery = never,
   TAuth extends boolean = false
 > extends _Route<TPath, TMethod, TResponse, TBody, TParams, TQuery, TAuth> {
   _decorators = [] as Array<
@@ -58,13 +54,14 @@ export class Route<
 
   override body<T extends ZodInterface>(_schema: T) {
     const route = super.body(_schema);
-    this._decorators.push(ApiBody({ schema: toJSONSchema(route._body) }));
+    if (route._body)
+      this._decorators.push(ApiBody({ schema: toJSONSchema(route._body) }));
 
     return this as unknown as Route<
       TPath,
       TMethod,
       TResponse,
-      typeof route._body,
+      z.output<T>,
       TParams,
       TQuery,
       TAuth
@@ -73,15 +70,17 @@ export class Route<
 
   override params<T extends ZodInterface>(_schema: T) {
     const route = super.params(_schema);
-    const shape = route._params._zod.shape;
+    if (route._params) {
+      const shape = route._params.def.shape;
 
-    for (const p in shape) {
-      const paramSchema = shape[p];
-      if (!paramSchema) continue;
+      for (const p in shape) {
+        const paramSchema = shape[p];
+        if (!paramSchema) continue;
 
-      const field = toJSONSchema(paramSchema);
+        const field = toJSONSchema(paramSchema);
 
-      this._decorators.push(ApiParam({ name: p, schema: field }));
+        this._decorators.push(ApiParam({ name: p, schema: field }));
+      }
     }
 
     return this as unknown as Route<
@@ -89,7 +88,7 @@ export class Route<
       TMethod,
       TResponse,
       TBody,
-      typeof route._params,
+      z.output<T>,
       TQuery,
       TAuth
     >;
@@ -97,14 +96,16 @@ export class Route<
 
   override query<T extends ZodInterface>(_schema: T) {
     const route = super.query(_schema);
-    const shape = route._query._zod.shape;
+    if (route._query) {
+      const shape = route._query.def.shape;
 
-    for (const q in shape) {
-      const querySchema = shape[q];
-      if (!querySchema) continue;
+      for (const q in shape) {
+        const querySchema = shape[q];
+        if (!querySchema) continue;
 
-      const field = toJSONSchema(querySchema);
-      this._decorators.push(ApiQuery({ name: q, schema: field }));
+        const field = toJSONSchema(querySchema);
+        this._decorators.push(ApiQuery({ name: q, schema: field }));
+      }
     }
 
     return this as unknown as Route<
@@ -113,7 +114,7 @@ export class Route<
       TResponse,
       TBody,
       TParams,
-      typeof route._query,
+      z.output<T>,
       TAuth
     >;
   }
@@ -135,14 +136,19 @@ export class Route<
 
   override response<T extends ZodInterface>(_schema: T) {
     const route = super.response(_schema);
-    this._decorators.push(
-      ApiResponse({ schema: toJSONSchema(route._response), status: HttpStatus.OK })
-    );
+    if (route._response) {
+      this._decorators.push(
+        ApiResponse({
+          schema: toJSONSchema(route._response),
+          status: HttpStatus.OK,
+        })
+      );
+    }
 
     return this as unknown as Route<
       TPath,
       TMethod,
-      typeof route._response,
+      z.output<T>,
       TBody,
       TParams,
       TQuery,
@@ -155,13 +161,13 @@ export class Route<
   }
 
   get Param() {
-    type ParamKey = PropertyKey<TParams> | undefined;
+    type ParamKey = Extract<TParams, string>;
 
     return createParamDecorator((data: ParamKey, ctx: ExecutionContext) => {
       const paramsData = ctx.switchToHttp().getRequest().params;
       if (this._params instanceof ZodInterface) {
         return data
-          ? this._params?._zod.shape[data]?._zod.parse(paramsData?.[data], {}) ??
+          ? this._params?.def.shape[data]?._zod.parse(paramsData?.[data], {}) ??
               paramsData?.[data]
           : this._params?.parse(paramsData);
       }
@@ -171,14 +177,15 @@ export class Route<
   }
 
   get Query() {
-    type QueryKey = PropertyKey<TQuery> | undefined;
+    type QueryKey = Extract<TQuery, string>;
 
     return createParamDecorator((data: QueryKey, ctx: ExecutionContext) => {
       const queries = ctx.switchToHttp().getRequest().query;
 
       if (this._query instanceof ZodInterface) {
         return data
-          ? this._query?._zod.shape[data]?._zod.parse(queries?.[data], {}) ?? queries?.[data]
+          ? this._query?.def.shape[data]?._zod.parse(queries?.[data], {}) ??
+              queries?.[data]
           : this._query?.parse(queries);
       }
 
@@ -187,13 +194,14 @@ export class Route<
   }
 
   get Body() {
-    type BodyKey = PropertyKey<TBody> | undefined;
+    type BodyKey = Extract<TBody, string>;
 
     return createParamDecorator((data: BodyKey, ctx: ExecutionContext) => {
       const payload = ctx.switchToHttp().getRequest().body;
       if (this._body instanceof ZodInterface) {
         return data
-          ? this._body._zod.shape[data]?._zod.parse(payload?.[data], {}) ?? payload?.[data]
+          ? this._body.def.shape[data]?._zod.parse(payload?.[data], {}) ??
+              payload?.[data]
           : this._body.parse(payload);
       }
 

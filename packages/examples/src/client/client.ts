@@ -5,7 +5,7 @@ import {
   rpcClient,
 } from '@fy-tools/rpc-client';
 
-import type { NestApp } from '../server-nestjs';
+import type { NestApp } from '../server';
 
 export class AppError extends _AppError<NestApp> {}
 
@@ -23,4 +23,4 @@ export type AddUserPayload = InferPayload<typeof addUser>;
 export type AddUserResponse = InferResponse<typeof addUser>;
 
 export const getUsers = client('user').$get;
-export const updateProfile = client('profile/:id').$patch
+export const updateProfile = client('profile/:id').$patch;
