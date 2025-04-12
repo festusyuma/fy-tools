@@ -1,5 +1,6 @@
 import { App } from '@fy-tools/rpc-server';
 import { z } from 'zod';
+
 import { controllerA } from './controllar-a';
 import { controllerB } from './controller-b';
 

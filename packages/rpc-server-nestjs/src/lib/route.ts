@@ -21,7 +21,7 @@ import {
   ApiQuery,
   ApiResponse,
 } from '@nestjs/swagger';
-import { toJSONSchema, ZodInterface, z } from 'zod';
+import { toJSONSchema, z,ZodInterface } from 'zod';
 
 import { ZodFilter } from './util/zod-filter';
 

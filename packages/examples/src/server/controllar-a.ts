@@ -1,4 +1,4 @@
-import { HttpMethod, Controller, Route } from '@fy-tools/rpc-server';
+import { Controller, HttpMethod, Route } from '@fy-tools/rpc-server';
 import * as z from 'zod';
 
 const routeA = new Route('/:id/update-me/:test', HttpMethod.POST)
