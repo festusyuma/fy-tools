@@ -1,8 +1,11 @@
-import type { App, Route } from '@fy-tools/rpc-server';
+import type {
+  App,
+  IsRouteMethod,
+  IsRoutePath,
+  Route,
+} from '@fy-tools/rpc-server';
 import type { AxiosRequestConfig, AxiosResponse } from 'axios';
 import * as z from 'zod';
-
-import { methods } from './constants';
 
 export type RpcClientOptions = {
   baseUrl?: string;
@@ -36,19 +39,6 @@ type StripNever<T> = {
   [K in keyof T as T[K] extends never ? never : K]: T[K];
 };
 
-type IsRoutePath<T extends Route, TP extends string> = T extends Route<TP>
-  ? T
-  : never;
-
-type IsRouteMethod<
-  T extends Route,
-  TM extends string
-> = TM extends keyof typeof methods
-  ? T extends Route<any, TM>
-    ? T
-    : never
-  : never;
-
 type Parse<T> = T extends z.ZodType ? z.output<T> : never;
 
 type Payload<R> = R extends Route<
@@ -76,7 +66,7 @@ export type Client<R extends Route> = <
 >(
   path: TPath
 ) => {
-  [key in TRoute['method']]: <
+  [key in TRoute['_method']]: <
     TMethodRoute extends IsRouteMethod<TRoute, key>,
     TPayload extends Payload<TMethodRoute>,
     TResponse extends Response<TMethodRoute>

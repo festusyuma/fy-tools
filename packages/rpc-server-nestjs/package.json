@@ -20,10 +20,13 @@
   "dependencies": {
     "@fy-tools/rpc-server": "0.0.106",
     "tslib": "^2.3.0",
-    "@nestjs/swagger": "^11.0.6",
-    "@nestjs/common": "^11.0.11"
+    "reflect-metadata": "0.2.2",
+    "rxjs": "^7.8.0",
+    "@nestjs/swagger": "11.1.5",
+    "@nestjs/common": "11.0.11",
+    "@nestjs/core": "11.0.11"
   },
   "peerDependencies": {
-    "zod": "4.0.0-beta.20250412T085909"
+    "zod": "4.0.0-beta.20250424T163858"
   }
 }

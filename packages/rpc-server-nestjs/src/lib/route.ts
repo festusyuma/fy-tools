@@ -12,50 +12,51 @@ import {
   Post,
   Put,
   Search,
-  UseFilters,
+  UseFilters
 } from '@nestjs/common';
 import {
-  ApiBearerAuth,
-  ApiBody,
-  ApiParam,
-  ApiQuery,
-  ApiResponse,
+  ApiBearerAuth, ApiQuery, ApiResponse
+  // ApiBody,
+  // ApiParam,
+  // ApiQuery,
+  // ApiResponse,
 } from '@nestjs/swagger';
 import { toJSONSchema, ZodInterface } from 'zod';
 
 import { ZodFilter } from './util/zod-filter';
 
 export class Route<
-  TPath extends string,
-  TMethod extends HttpMethod,
-  TResponse extends ZodInterface = never,
-  TBody extends ZodInterface = never,
-  TParams extends ZodInterface = never,
-  TQuery extends ZodInterface = never,
+  TPath extends string = any,
+  TMethod extends HttpMethod = any,
+  TResponse extends ZodInterface | unknown = unknown,
+  TBody extends ZodInterface | unknown = unknown,
+  TParams extends ZodInterface | unknown = unknown,
+  TQuery extends ZodInterface | unknown = unknown,
   TAuth extends boolean = false
 > extends _Route<TPath, TMethod, TResponse, TBody, TParams, TQuery, TAuth> {
   _decorators = [] as Array<
     ClassDecorator | MethodDecorator | PropertyDecorator
   >;
 
-  constructor(path: TPath, public override method: TMethod) {
-    super(path, method);
+  constructor(path: TPath, public override _method: TMethod) {
+    super(path, _method);
     this._decorators.push(UseFilters(ZodFilter));
-    if (method === HttpMethod.ALL) this._decorators.push(All(path));
-    if (method === HttpMethod.DELETE) this._decorators.push(Delete(path));
-    if (method === HttpMethod.GET) this._decorators.push(Get(path));
-    if (method === HttpMethod.HEAD) this._decorators.push(All(path));
-    if (method === HttpMethod.POST) this._decorators.push(Post(path));
-    if (method === HttpMethod.PATCH) this._decorators.push(Patch(path));
-    if (method === HttpMethod.OPTIONS) this._decorators.push(Options(path));
-    if (method === HttpMethod.SEARCH) this._decorators.push(Search(path));
-    if (method === HttpMethod.PUT) this._decorators.push(Put(path));
+    if (_method === HttpMethod.ALL) this._decorators.push(All(path));
+    if (_method === HttpMethod.DELETE) this._decorators.push(Delete(path));
+    if (_method === HttpMethod.GET) this._decorators.push(Get(path));
+    if (_method === HttpMethod.HEAD) this._decorators.push(All(path));
+    if (_method === HttpMethod.POST) this._decorators.push(Post(path));
+    if (_method === HttpMethod.PATCH) this._decorators.push(Patch(path));
+    if (_method === HttpMethod.OPTIONS) this._decorators.push(Options(path));
+    if (_method === HttpMethod.SEARCH) this._decorators.push(Search(path));
+    if (_method === HttpMethod.PUT) this._decorators.push(Put(path));
   }
 
   override body<T extends ZodInterface>(_schema: T) {
     const route = super.body(_schema);
-    if (route._body)
-      this._decorators.push(ApiBody({ schema: toJSONSchema(route._body) }));
+    if (route._body) {
+      // this._decorators.push(ApiBody({ schema: toJSONSchema(route._body) }));
+    }
 
     return this as unknown as Route<
       TPath,
@@ -77,9 +78,9 @@ export class Route<
         const paramSchema = shape[p];
         if (!paramSchema) continue;
 
-        const field = toJSONSchema(paramSchema);
+        // const field = toJSONSchema(paramSchema);
 
-        this._decorators.push(ApiParam({ name: p, schema: field }));
+        // this._decorators.push(ApiParam({ name: p, schema: field }));
       }
     }
 

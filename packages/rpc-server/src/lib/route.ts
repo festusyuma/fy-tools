@@ -20,7 +20,7 @@ export class Route<
   _body: TBody | undefined;
   _authorized = false as TAuth;
 
-  constructor(path: TPath, public method: TMethod) {
+  constructor(path: TPath, public _method: TMethod) {
     this._path = stripSlashes(path);
   }
 
