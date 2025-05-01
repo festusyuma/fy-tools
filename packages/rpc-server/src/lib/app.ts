@@ -1,7 +1,5 @@
-import type { ZodInterface } from 'zod';
-
 import type { Controller } from './controller.js';
-import { RouteByFullPath,RouteFullPath } from './types';
+import { JsonType, RouteByFullPath, RouteFullPath } from './types';
 
 type MergeController<
   T extends readonly Controller[],
@@ -10,7 +8,7 @@ type MergeController<
 
 export class App<
   T extends Controller[] = never[],
-  TE extends { [k in number]: ZodInterface } = {
+  TE extends { [k in number]: JsonType } = {
     [key in never]: never;
   }
 > {
@@ -34,7 +32,7 @@ export class App<
     return app;
   }
 
-  error<Status extends number, Body extends ZodInterface>(
+  error<Status extends number, Body extends JsonType>(
     status: Status,
     error: Body
   ) {
@@ -45,7 +43,7 @@ export class App<
     return app;
   }
 
-  getRoute<
+  protected findRoute<
     TRoutes extends (typeof this._controllers)[number]['_routes'][number],
     TPath extends RouteFullPath<TRoutes>,
     TResponse extends RouteByFullPath<TRoutes, TPath>

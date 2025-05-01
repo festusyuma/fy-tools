@@ -1,16 +1,15 @@
 import {
   App as _App,
   Controller,
+  JsonType,
   RouteByFullPath,
   RouteFullPath,
 } from '@fy-tools/rpc-server';
-import type { ZodInterface } from 'zod';
-
 import { FromBaseRoute } from './types';
 
 export class App<
   T extends Controller[] = never[],
-  TE extends { [k in number]: ZodInterface } = {
+  TE extends { [k in number]: JsonType } = {
     [key in never]: never;
   }
 > extends _App<T, TE> {
@@ -22,7 +21,7 @@ export class App<
     >;
   }
 
-  override error<Status extends number, Body extends ZodInterface>(
+  override error<Status extends number, Body extends JsonType>(
     status: Status,
     error: Body
   ) {
@@ -33,11 +32,11 @@ export class App<
     >;
   }
 
-  override getRoute<
+  getRoute<
     TRoutes extends (typeof this._controllers)[number]['_routes'][number],
     TPath extends RouteFullPath<TRoutes>,
     TResponse = FromBaseRoute<RouteByFullPath<TRoutes, TPath>>
   >(path: TPath): TResponse {
-    return super.getRoute(path);
+    return super.findRoute(path);
   }
 }

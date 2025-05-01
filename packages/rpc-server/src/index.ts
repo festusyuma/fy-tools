@@ -15,6 +15,7 @@ export type {
   RouteByFullPath,
   RouteFullPath,
   RoutePath,
+  JsonType
 } from './lib/types.js';
 export { HttpMethod } from './lib/util/constants.js';
 export { ErrorSchemaKeys } from './lib/util/constants.js';

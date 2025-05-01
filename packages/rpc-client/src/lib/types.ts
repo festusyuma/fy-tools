@@ -5,7 +5,7 @@ import type {
   Route,
 } from '@fy-tools/rpc-server';
 import type { AxiosRequestConfig, AxiosResponse } from 'axios';
-import * as z from 'zod';
+import { Type } from 'arktype';
 
 export type RpcClientOptions = {
   baseUrl?: string;
@@ -24,8 +24,8 @@ export type InferOptions<T extends ApiRouteFunction> =
 
 export type InferError<T> = T extends App<any, infer Error>
   ? {
-      [key in keyof Error]: Error[key] extends z.ZodInterface
-        ? z.output<Error[key]>
+      [key in keyof Error]: Error[key] extends Type
+        ? Error[key]['infer']
         : never;
     }
   : never;
@@ -39,7 +39,7 @@ type StripNever<T> = {
   [K in keyof T as T[K] extends never ? never : K]: T[K];
 };
 
-type Parse<T> = T extends z.ZodType ? z.output<T> : never;
+type Parse<T> = T extends Type ? T['infer'] : never;
 
 type Payload<R> = R extends Route<
   any,

@@ -1,4 +1,9 @@
-import { HttpMethod, PropertyKey,Route as _Route } from '@fy-tools/rpc-server';
+import {
+  HttpMethod,
+  PropertyKey,
+  Route as _Route,
+  type JsonType,
+} from '@fy-tools/rpc-server';
 import {
   All,
   applyDecorators,
@@ -12,26 +17,27 @@ import {
   Post,
   Put,
   Search,
-  UseFilters
+  UseFilters,
 } from '@nestjs/common';
 import {
-  ApiBearerAuth, ApiQuery, ApiResponse
-  // ApiBody,
-  // ApiParam,
-  // ApiQuery,
-  // ApiResponse,
+  ApiBearerAuth,
+  ApiBody,
+  ApiParam,
+  ApiQuery,
+  ApiResponse,
 } from '@nestjs/swagger';
-import { toJSONSchema, ZodInterface } from 'zod';
 
-import { ZodFilter } from './util/zod-filter';
+import { ArkFilter } from './util/ark-filter';
+import type { SchemaObject } from '@nestjs/swagger/dist/interfaces/open-api-spec.interface';
+import { Type, JsonSchema, type } from 'arktype';
 
 export class Route<
   TPath extends string = any,
   TMethod extends HttpMethod = any,
-  TResponse extends ZodInterface | unknown = unknown,
-  TBody extends ZodInterface | unknown = unknown,
-  TParams extends ZodInterface | unknown = unknown,
-  TQuery extends ZodInterface | unknown = unknown,
+  TResponse extends JsonType | unknown = unknown,
+  TBody extends JsonType | unknown = unknown,
+  TParams extends JsonType | unknown = unknown,
+  TQuery extends JsonType | unknown = unknown,
   TAuth extends boolean = false
 > extends _Route<TPath, TMethod, TResponse, TBody, TParams, TQuery, TAuth> {
   _decorators = [] as Array<
@@ -40,7 +46,7 @@ export class Route<
 
   constructor(path: TPath, public override _method: TMethod) {
     super(path, _method);
-    this._decorators.push(UseFilters(ZodFilter));
+    this._decorators.push(UseFilters(ArkFilter));
     if (_method === HttpMethod.ALL) this._decorators.push(All(path));
     if (_method === HttpMethod.DELETE) this._decorators.push(Delete(path));
     if (_method === HttpMethod.GET) this._decorators.push(Get(path));
@@ -52,10 +58,12 @@ export class Route<
     if (_method === HttpMethod.PUT) this._decorators.push(Put(path));
   }
 
-  override body<T extends ZodInterface>(_schema: T) {
+  override body<T extends JsonType>(_schema: T) {
     const route = super.body(_schema);
     if (route._body) {
-      // this._decorators.push(ApiBody({ schema: toJSONSchema(route._body) }));
+      this._decorators.push(
+        ApiBody({ schema: _schema.toJsonSchema() as SchemaObject })
+      );
     }
 
     return this as unknown as Route<
@@ -69,18 +77,19 @@ export class Route<
     >;
   }
 
-  override params<T extends ZodInterface>(_schema: T) {
+  override params<T extends JsonType>(_schema: T) {
     const route = super.params(_schema);
     if (route._params) {
-      const shape = route._params.def.shape;
+      const schema = _schema.toJsonSchema() as JsonSchema.Object;
 
-      for (const p in shape) {
-        const paramSchema = shape[p];
-        if (!paramSchema) continue;
-
-        // const field = toJSONSchema(paramSchema);
-
-        // this._decorators.push(ApiParam({ name: p, schema: field }));
+      for (const p in schema.properties) {
+        this._decorators.push(
+          ApiParam({
+            name: p,
+            schema: schema.properties[p] as SchemaObject,
+            required: schema.required?.includes(p),
+          })
+        );
       }
     }
 
@@ -95,17 +104,19 @@ export class Route<
     >;
   }
 
-  override query<T extends ZodInterface>(_schema: T) {
+  override query<T extends JsonType>(_schema: T) {
     const route = super.query(_schema);
     if (route._query) {
-      const shape = route._query.def.shape;
+      const schema = _schema.toJsonSchema() as JsonSchema.Object;
 
-      for (const q in shape) {
-        const querySchema = shape[q];
-        if (!querySchema) continue;
-
-        const field = toJSONSchema(querySchema);
-        this._decorators.push(ApiQuery({ name: q, schema: field }));
+      for (const p in schema.properties) {
+        this._decorators.push(
+          ApiQuery({
+            name: p,
+            schema: schema.properties[p] as SchemaObject,
+            required: schema.required?.includes(p),
+          })
+        );
       }
     }
 
@@ -135,12 +146,12 @@ export class Route<
     >;
   }
 
-  override response<T extends ZodInterface>(_schema: T) {
+  override response<T extends JsonType>(_schema: T) {
     const route = super.response(_schema);
     if (route._response) {
       this._decorators.push(
         ApiResponse({
-          schema: toJSONSchema(route._response),
+          schema: _schema.toJsonSchema() as SchemaObject,
           status: HttpStatus.OK,
         })
       );
@@ -166,14 +177,7 @@ export class Route<
 
     return createParamDecorator((data: Key, ctx: ExecutionContext) => {
       const paramsData = ctx.switchToHttp().getRequest().params;
-      if (this._params instanceof ZodInterface) {
-        return data
-          ? this._params?.def.shape[data]?._zod.parse(paramsData?.[data], {}) ??
-              paramsData?.[data]
-          : this._params?.parse(paramsData);
-      }
-
-      return data ? paramsData?.[data] : paramsData;
+      return this.getDataOrField(paramsData, this._params as Type<object>, data);
     });
   }
 
@@ -182,15 +186,7 @@ export class Route<
 
     return createParamDecorator((data: Key, ctx: ExecutionContext) => {
       const queries = ctx.switchToHttp().getRequest().query;
-
-      if (this._query instanceof ZodInterface) {
-        return data
-          ? this._query?.def.shape[data]?._zod.parse(queries?.[data], {}) ??
-              queries?.[data]
-          : this._query?.parse(queries);
-      }
-
-      return data ? queries?.[data] : queries;
+      return this.getDataOrField(queries, this._query as Type<object>, data);
     });
   }
 
@@ -199,14 +195,21 @@ export class Route<
 
     return createParamDecorator((data: Key, ctx: ExecutionContext) => {
       const payload = ctx.switchToHttp().getRequest().body;
-      if (this._body instanceof ZodInterface) {
-        return data
-          ? this._body.def.shape[data]?._zod.parse(payload?.[data], {}) ??
-              payload?.[data]
-          : this._body.parse(payload);
-      }
-
-      return data ? payload?.[data] : payload;
+      return this.getDataOrField(payload, this._body as Type<object>, data);
     });
+  }
+
+  private getDataOrField<T extends Type<object> | undefined = undefined>(
+    payload: any,
+    schema: T,
+    key: any
+  ) {
+    if (!(schema instanceof Type)) return key ? payload?.[key] : payload;
+
+    const out = schema(payload);
+    if (out instanceof type.errors) return out.throw();
+
+    // @ts-expect-error key not found
+    return key ? out[key] : out;
   }
 }
