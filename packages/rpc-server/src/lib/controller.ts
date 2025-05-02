@@ -25,6 +25,7 @@ export class Controller<
 > {
   _basePath: StripSlashes<BTPath>;
   _routes = [] as unknown as TRoutes;
+  _routes_map: Record<string, number> = {};
 
   constructor(basePath = undefined as BTPath) {
     this._basePath = stripSlashes(basePath);
@@ -34,15 +35,18 @@ export class Controller<
     type ControllerRoute = AddControllerRoute<BTPath, TR>;
     type NewTRoutes = MergeRoute<TRoutes, [ControllerRoute]>;
 
-    const controller = this as unknown as Controller<
-      BTPath,
-      NewTRoutes
-    >;
+    const controller = this as unknown as Controller<BTPath, NewTRoutes>;
 
     controller._routes = [
       ...this._routes,
-      route as unknown as ControllerRoute
+      route as unknown as ControllerRoute,
     ] as NewTRoutes;
+
+    const fullPathKey = stripSlashes(
+      `${route._method}: ${controller._basePath}/${route._path}`
+    );
+
+    this._routes_map[fullPathKey] = controller._routes.length - 1;
 
     return controller;
   }

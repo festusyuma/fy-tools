@@ -6,4 +6,5 @@ export type {
   InferError,
   InferOptions,
   InferPayload,
-  InferResponse} from './lib/types.js';
+  InferResponse,
+} from './lib/types.js';

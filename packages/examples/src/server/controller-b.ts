@@ -1,9 +1,9 @@
 import { Controller, HttpMethod, Route } from '@fy-tools/rpc-server';
-import * as z from 'zod';
+import { type } from 'arktype';
 
 const routeD = new Route('/:id', HttpMethod.PATCH)
-  .params(z.interface({ id: z.string() }))
-  .body(z.interface({ name: z.string() }))
-  .response(z.interface({ updated: z.boolean() }));
+  .params(type({ id: "string" }))
+  .body(type({ name: "string", age: "number" }))
+  .response(type({ updated: "boolean" }));
 
 export const controllerB = new Controller('profile').route(routeD);

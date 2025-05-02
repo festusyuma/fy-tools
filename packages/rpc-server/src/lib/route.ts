@@ -1,16 +1,14 @@
-import { ZodInterface } from 'zod';
-
-import { type StripSlashes } from './types.js';
+import { JsonType, type StripSlashes } from './types.js';
 import { HttpMethod } from './util/constants.js';
 import { stripSlashes } from './util/strip-slashes.js';
 
 export class Route<
   TPath extends string = any,
   TMethod extends HttpMethod = any,
-  TResponse extends ZodInterface | unknown = unknown,
-  TBody extends ZodInterface | unknown = unknown,
-  TParams extends ZodInterface | unknown = unknown,
-  TQuery extends ZodInterface | unknown = unknown,
+  TResponse extends JsonType | unknown = unknown,
+  TBody extends JsonType | unknown = unknown,
+  TParams extends JsonType | unknown = unknown,
+  TQuery extends JsonType | unknown = unknown,
   TAuth extends boolean = false
 > {
   _path: StripSlashes<TPath>;
@@ -20,11 +18,11 @@ export class Route<
   _body: TBody | undefined;
   _authorized = false as TAuth;
 
-  constructor(path: TPath, public method: TMethod) {
+  constructor(path: TPath, public _method: TMethod) {
     this._path = stripSlashes(path);
   }
 
-  body<T extends ZodInterface>(_schema: T) {
+  body<T extends JsonType>(_schema: T) {
     const route = this as unknown as Route<
       TPath,
       TMethod,
@@ -39,7 +37,7 @@ export class Route<
     return route;
   }
 
-  params<T extends ZodInterface>(_schema: T) {
+  params<T extends JsonType>(_schema: T) {
     const route = this as unknown as Route<
       TPath,
       TMethod,
@@ -55,7 +53,7 @@ export class Route<
     return route;
   }
 
-  query<T extends ZodInterface>(_schema: T) {
+  query<T extends JsonType>(_schema: T) {
     const route = this as unknown as Route<
       TPath,
       TMethod,
@@ -86,7 +84,7 @@ export class Route<
     return route;
   }
 
-  response<T extends ZodInterface>(_schema: T) {
+  response<T extends JsonType>(_schema: T) {
     const route = this as unknown as Route<
       TPath,
       TMethod,
