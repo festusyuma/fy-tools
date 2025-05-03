@@ -1,6 +1,6 @@
 {
   "name": "@fy-tools/rpc-client",
-  "version": "0.0.106",
+  "version": "0.0.107",
   "repository": "https://github.com/festusyuma/fy-tools",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -18,11 +18,12 @@
     "!**/*.tsbuildinfo"
   ],
   "dependencies": {
+    "@standard-schema/spec": "^1.0.0",
     "arktype": "^2.1.20",
     "axios": "1.9.0",
     "tslib": "^2.3.0"
   },
   "peerDependencies": {
-    "@fy-tools/rpc-server": "0.0.106"
+    "@fy-tools/rpc-server": "0.0.107"
   }
 }

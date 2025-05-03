@@ -1,6 +1,6 @@
 {
   "name": "@fy-tools/rpc-server-nestjs",
-  "version": "0.0.106",
+  "version": "0.0.107",
   "repository": "https://github.com/festusyuma/fy-tools",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -18,10 +18,11 @@
     "!**/*.tsbuildinfo"
   ],
   "dependencies": {
-    "@fy-tools/rpc-server": "0.0.106",
+    "@fy-tools/rpc-server": "0.0.107",
     "@nestjs/common": "11.0.11",
     "@nestjs/core": "11.0.11",
     "@nestjs/swagger": "11.1.5",
+    "@standard-schema/spec": "^1.0.0",
     "arktype": "^2.1.20",
     "reflect-metadata": "0.2.2",
     "rxjs": "^7.8.0",

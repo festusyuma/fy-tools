@@ -1,6 +1,6 @@
 {
   "name": "@fy-tools/rpc-server",
-  "version": "0.0.106",
+  "version": "0.0.107",
   "repository": "https://github.com/festusyuma/fy-tools",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -18,6 +18,7 @@
     "!**/*.tsbuildinfo"
   ],
   "dependencies": {
+    "@standard-schema/spec": "^1.0.0",
     "arktype": "^2.1.20",
     "tslib": "^2.3.0"
   }
