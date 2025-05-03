@@ -2,16 +2,17 @@ import {
   AppError as _AppError,
   type InferPayload,
   type InferResponse,
-  rpcClient,
+  rpcClient
 } from '@fy-tools/rpc-client';
 
 import type { NestApp } from '../server';
 
-export class AppError extends _AppError<NestApp> {}
+export class AppError extends _AppError<NestApp> {
+}
 
 export const client = rpcClient<NestApp>({
   /** Use axios instance options here */
-  baseUrl: 'http://127.0.0.1',
+  baseUrl: 'http://127.0.0.1'
 });
 
 export const addUser = client('user').$post;

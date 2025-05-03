@@ -1,26 +1,30 @@
-import {
-  Controller as _Controller,
-  Route,
-  stripSlashes,
-} from '@fy-tools/rpc-server';
+import { Controller as _Controller, RouteByFullPath, RouteFullPath } from '@fy-tools/rpc-server';
 import { applyDecorators, Controller as N_Controller } from '@nestjs/common';
 
-export class Controller<
-  BTPath extends string | undefined = any,
-  TRoutes extends Route[] = never[]
-> extends _Controller<BTPath, TRoutes> {
-  constructor(_basePath = undefined as BTPath) {
-    super(_basePath);
+import { Route } from './route';
+import { AppConfig } from './types';
+
+export class Controller<Schema extends _Controller<any, any>> {
+  public _routes: Record<string, any> = {};
+
+  constructor(public _schema: Schema, config?: AppConfig) {
+    for (const i in _schema._routes_map) {
+      this._routes[i] = new Route(
+        this._schema._routes[_schema._routes_map[i]],
+        config?.toJsonSchema
+      );
+    }
   }
 
-  override route<TR extends Route>(route: TR) {
-    const controller = super.route(route);
-    type controller = typeof controller;
-
-    return this as unknown as Controller<BTPath, controller['_routes']>;
+  getRoute<
+    TRoutes extends Schema['_routes'][number],
+    TPath extends RouteFullPath<TRoutes>,
+    TRoute extends RouteByFullPath<TRoutes, TPath>
+  >(path: TPath): Route<TRoute> {
+    return this._routes[path];
   }
 
   get Controller() {
-    return applyDecorators(N_Controller(stripSlashes(this._basePath)));
+    return applyDecorators(N_Controller(this._schema._basePath));
   }
 }

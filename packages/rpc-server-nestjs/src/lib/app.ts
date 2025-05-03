@@ -1,42 +1,41 @@
 import {
   App as _App,
-  Controller,
-  JsonType,
+  Controller as _Controller,
+  ControllerByFullPath,
   RouteByFullPath,
   RouteFullPath,
 } from '@fy-tools/rpc-server';
-import { FromBaseRoute } from './types';
 
-export class App<
-  T extends Controller[] = never[],
-  TE extends { [k in number]: JsonType } = {
-    [key in never]: never;
-  }
-> extends _App<T, TE> {
-  override controller<TC extends Controller<any, any>>(controller: TC) {
-    const updated = super.controller(controller);
-    return updated as App<
-      (typeof updated)['_controllers'],
-      (typeof updated)['_errors']
-    >;
+import { Controller } from './controller';
+import { Route } from './route';
+import { AppConfig } from './types';
+
+export class App<TA extends _App<_Controller<any, any>[]>> {
+  _controllers: Record<string, any> = {};
+  _routes: Record<string, any> = {};
+
+  constructor(public _schema: TA, config?: AppConfig) {
+    for (const i in _schema._controllers) {
+      const controller = new Controller(_schema._controllers[i], config);
+
+      this._routes = { ...this._routes, ...controller._routes };
+      this._controllers[controller._schema._basePath] = controller;
+    }
   }
 
-  override error<Status extends number, Body extends JsonType>(
-    status: Status,
-    error: Body
-  ) {
-    const updated = super.error(status, error);
-    return updated as App<
-      (typeof updated)['_controllers'],
-      (typeof updated)['_errors']
-    >;
+  getController<
+    TControllers extends TA['_controllers'][number],
+    TPath extends TControllers['_basePath'],
+    TController extends ControllerByFullPath<TControllers, TPath>
+  >(path: TPath): Controller<TController> {
+    return this._controllers[path];
   }
 
   getRoute<
-    TRoutes extends (typeof this._controllers)[number]['_routes'][number],
+    TRoutes extends TA['_controllers'][number]['_routes'][number],
     TPath extends RouteFullPath<TRoutes>,
-    TResponse = FromBaseRoute<RouteByFullPath<TRoutes, TPath>>
-  >(path: TPath): TResponse {
-    return super.findRoute(path);
+    TRoute extends RouteByFullPath<TRoutes, TPath>
+  >(path: TPath): Route<TRoute> {
+    return this._routes[path];
   }
 }

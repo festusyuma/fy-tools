@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import type { Controller } from './controller.js';
 import { JsonType, RouteByFullPath, RouteFullPath } from './types';
 

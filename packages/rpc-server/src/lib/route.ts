@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { JsonType, type StripSlashes } from './types.js';
 import { HttpMethod } from './util/constants.js';
 import { stripSlashes } from './util/strip-slashes.js';

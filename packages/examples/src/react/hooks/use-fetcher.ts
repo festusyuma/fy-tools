@@ -19,7 +19,7 @@ export function useFetcher<T extends ApiRouteFunction>(
     keys,
     async () => {
       const res = await getMethod(args, options);
-      return res.data as InferResponse<T>
+      return res.data as InferResponse<T>;
     },
     {
       shouldRetryOnError: false,

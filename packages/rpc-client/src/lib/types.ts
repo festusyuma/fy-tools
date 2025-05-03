@@ -4,8 +4,8 @@ import type {
   IsRoutePath,
   Route,
 } from '@fy-tools/rpc-server';
+import { StandardSchemaV1 } from '@standard-schema/spec';
 import type { AxiosRequestConfig, AxiosResponse } from 'axios';
-import { Type } from 'arktype';
 
 export type RpcClientOptions = {
   baseUrl?: string;
@@ -24,8 +24,8 @@ export type InferOptions<T extends ApiRouteFunction> =
 
 export type InferError<T> = T extends App<any, infer Error>
   ? {
-      [key in keyof Error]: Error[key] extends Type
-        ? Error[key]['infer']
+      [key in keyof Error]: Error[key] extends StandardSchemaV1<infer _, infer O>
+        ? O
         : never;
     }
   : never;
@@ -39,7 +39,7 @@ type StripNever<T> = {
   [K in keyof T as T[K] extends never ? never : K]: T[K];
 };
 
-type Parse<T> = T extends Type ? T['infer'] : never;
+type Parse<T> = T extends StandardSchemaV1<infer _, infer O> ? O : never;
 
 type Payload<R> = R extends Route<
   any,

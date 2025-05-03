@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { Route } from './route.js';
 import { RoutePath, StripSlashes } from './types.js';
 import { stripSlashes } from './util/strip-slashes.js';

@@ -1,9 +1,4 @@
-import {
-  HttpMethod,
-  PropertyKey,
-  Route as _Route,
-  type JsonType,
-} from '@fy-tools/rpc-server';
+import { HttpMethod, PropertyKey, Route as _Route } from '@fy-tools/rpc-server';
 import {
   All,
   applyDecorators,
@@ -26,190 +21,153 @@ import {
   ApiQuery,
   ApiResponse,
 } from '@nestjs/swagger';
-
-import { ArkFilter } from './util/ark-filter';
 import type { SchemaObject } from '@nestjs/swagger/dist/interfaces/open-api-spec.interface';
-import { Type, JsonSchema, type } from 'arktype';
+import { StandardSchemaV1 } from '@standard-schema/spec';
 
-export class Route<
-  TPath extends string = any,
-  TMethod extends HttpMethod = any,
-  TResponse extends JsonType | unknown = unknown,
-  TBody extends JsonType | unknown = unknown,
-  TParams extends JsonType | unknown = unknown,
-  TQuery extends JsonType | unknown = unknown,
-  TAuth extends boolean = false
-> extends _Route<TPath, TMethod, TResponse, TBody, TParams, TQuery, TAuth> {
-  _decorators = [] as Array<
-    ClassDecorator | MethodDecorator | PropertyDecorator
-  >;
+import { IssuesFilter } from './util/issues-filter';
+import { ValidationError } from './util/validation-error';
 
-  constructor(path: TPath, public override _method: TMethod) {
-    super(path, _method);
-    this._decorators.push(UseFilters(ArkFilter));
-    if (_method === HttpMethod.ALL) this._decorators.push(All(path));
-    if (_method === HttpMethod.DELETE) this._decorators.push(Delete(path));
-    if (_method === HttpMethod.GET) this._decorators.push(Get(path));
-    if (_method === HttpMethod.HEAD) this._decorators.push(All(path));
-    if (_method === HttpMethod.POST) this._decorators.push(Post(path));
-    if (_method === HttpMethod.PATCH) this._decorators.push(Patch(path));
-    if (_method === HttpMethod.OPTIONS) this._decorators.push(Options(path));
-    if (_method === HttpMethod.SEARCH) this._decorators.push(Search(path));
-    if (_method === HttpMethod.PUT) this._decorators.push(Put(path));
-  }
+// const config = {
+//   toJsonSchema: {
+//     fallback: {
+//       date: (ctx) => ({
+//         ...ctx.base,
+//         type: 'string',
+//         format: 'date-time',
+//         description: ctx.after ? `after ${ctx.after.toISOString()}` : 'anytime',
+//       }),
+//     },
+//   },
+// };
 
-  override body<T extends JsonType>(_schema: T) {
-    const route = super.body(_schema);
-    if (route._body) {
-      this._decorators.push(
-        ApiBody({ schema: _schema.toJsonSchema() as SchemaObject })
+export class Route<Schema extends _Route<any, any, any, any, any, any, any>> {
+  constructor(
+    public _schema: Schema,
+    private _toJsonSchema?: (schema: unknown) => SchemaObject
+  ) {}
+
+  get Handler() {
+    const method = this._schema._method;
+    const path = this._schema._path;
+
+    const decorators = [];
+
+    decorators.push(UseFilters(IssuesFilter));
+
+    if (method === HttpMethod.ALL) decorators.push(All(path));
+    if (method === HttpMethod.DELETE) decorators.push(Delete(path));
+    if (method === HttpMethod.GET) decorators.push(Get(path));
+    if (method === HttpMethod.HEAD) decorators.push(All(path));
+    if (method === HttpMethod.POST) decorators.push(Post(path));
+    if (method === HttpMethod.PATCH) decorators.push(Patch(path));
+    if (method === HttpMethod.OPTIONS) decorators.push(Options(path));
+    if (method === HttpMethod.SEARCH) decorators.push(Search(path));
+    if (method === HttpMethod.PUT) decorators.push(Put(path));
+
+    if (this._schema._body && this._toJsonSchema) {
+      decorators.push(
+        ApiBody({
+          schema: this._toJsonSchema(this._schema._body),
+        })
       );
     }
 
-    return this as unknown as Route<
-      TPath,
-      TMethod,
-      TResponse,
-      T,
-      TParams,
-      TQuery,
-      TAuth
-    >;
-  }
-
-  override params<T extends JsonType>(_schema: T) {
-    const route = super.params(_schema);
-    if (route._params) {
-      const schema = _schema.toJsonSchema() as JsonSchema.Object;
-
-      for (const p in schema.properties) {
-        this._decorators.push(
-          ApiParam({
-            name: p,
-            schema: schema.properties[p] as SchemaObject,
-            required: schema.required?.includes(p),
-          })
-        );
-      }
-    }
-
-    return this as unknown as Route<
-      TPath,
-      TMethod,
-      TResponse,
-      TBody,
-      T,
-      TQuery,
-      TAuth
-    >;
-  }
-
-  override query<T extends JsonType>(_schema: T) {
-    const route = super.query(_schema);
-    if (route._query) {
-      const schema = _schema.toJsonSchema() as JsonSchema.Object;
-
-      for (const p in schema.properties) {
-        this._decorators.push(
-          ApiQuery({
-            name: p,
-            schema: schema.properties[p] as SchemaObject,
-            required: schema.required?.includes(p),
-          })
-        );
-      }
-    }
-
-    return this as unknown as Route<
-      TPath,
-      TMethod,
-      TResponse,
-      TBody,
-      TParams,
-      T,
-      TAuth
-    >;
-  }
-
-  override authorized() {
-    super.authorized();
-    this._decorators.push(ApiBearerAuth());
-
-    return this as unknown as Route<
-      TPath,
-      TMethod,
-      TResponse,
-      TBody,
-      TParams,
-      TQuery,
-      true
-    >;
-  }
-
-  override response<T extends JsonType>(_schema: T) {
-    const route = super.response(_schema);
-    if (route._response) {
-      this._decorators.push(
+    if (this._schema._response && this._toJsonSchema) {
+      decorators.push(
         ApiResponse({
-          schema: _schema.toJsonSchema() as SchemaObject,
+          schema: this._toJsonSchema(this._schema._response),
           status: HttpStatus.OK,
         })
       );
     }
 
-    return this as unknown as Route<
-      TPath,
-      TMethod,
-      T,
-      TBody,
-      TParams,
-      TQuery,
-      TAuth
-    >;
-  }
+    if (this._schema._params && this._toJsonSchema) {
+      const schema = this._toJsonSchema(this._schema._params);
 
-  get Handler() {
-    return applyDecorators(...this._decorators);
+      for (const p in schema.properties) {
+        decorators.push(
+          ApiParam({
+            name: p,
+            schema: schema.properties[p] as SchemaObject,
+            required: schema.required?.includes(p) ?? false,
+          })
+        );
+      }
+    }
+
+    if (this._schema._query && this._toJsonSchema) {
+      const schema = this._toJsonSchema(this._schema._query);
+
+      for (const p in schema.properties) {
+        decorators.push(
+          ApiQuery({
+            name: p,
+            schema: schema.properties[p] as SchemaObject,
+            required: schema.required?.includes(p) ?? false,
+          })
+        );
+      }
+    }
+
+    if (this._schema._authorized) {
+      decorators.push(ApiBearerAuth());
+    }
+
+    return applyDecorators(...decorators);
   }
 
   get Param() {
-    type Key = PropertyKey<TParams> | undefined;
+    type Key = PropertyKey<Schema['_params']> | undefined;
 
     return createParamDecorator((data: Key, ctx: ExecutionContext) => {
       const paramsData = ctx.switchToHttp().getRequest().params;
-      return this.getDataOrField(paramsData, this._params as Type<object>, data);
+      return this.getDataOrField(
+        paramsData,
+        this._schema._params as StandardSchemaV1,
+        data
+      );
     });
   }
 
   get Query() {
-    type Key = PropertyKey<TQuery> | undefined;
+    type Key = PropertyKey<Schema['_query']> | undefined;
 
     return createParamDecorator((data: Key, ctx: ExecutionContext) => {
       const queries = ctx.switchToHttp().getRequest().query;
-      return this.getDataOrField(queries, this._query as Type<object>, data);
+      return this.getDataOrField(
+        queries,
+        this._schema._query as StandardSchemaV1,
+        data
+      );
     });
   }
 
   get Body() {
-    type Key = PropertyKey<TBody> | undefined;
+    type Key = PropertyKey<Schema['_body']> | undefined;
 
     return createParamDecorator((data: Key, ctx: ExecutionContext) => {
       const payload = ctx.switchToHttp().getRequest().body;
-      return this.getDataOrField(payload, this._body as Type<object>, data);
+      return this.getDataOrField(
+        payload,
+        this._schema._body as StandardSchemaV1,
+        data
+      );
     });
   }
 
-  private getDataOrField<T extends Type<object> | undefined = undefined>(
+  private getDataOrField<T extends StandardSchemaV1 | undefined = undefined>(
     payload: any,
     schema: T,
     key: any
   ) {
-    if (!(schema instanceof Type)) return key ? payload?.[key] : payload;
+    if (!schema) return key ? payload?.[key] : payload;
 
-    const out = schema(payload);
-    if (out instanceof type.errors) return out.throw();
+    const out = schema['~standard'].validate(
+      payload
+    ) as StandardSchemaV1.Result<unknown>;
+    if (out.issues) throw new ValidationError(out.issues);
 
     // @ts-expect-error key not found
-    return key ? out[key] : out;
+    return key ? out.value?.[key] : out.value;
   }
 }
