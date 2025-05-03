@@ -1,7 +1,10 @@
 {
   "name": "@fy-tools/rpc-server",
-  "version": "0.0.107",
-  "repository": "https://github.com/festusyuma/fy-tools",
+  "version": "0.0.108",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/festusyuma/fy-tools.git"
+  },
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
