@@ -1,6 +1,6 @@
 {
   "name": "@fy-tools/rpc-server-nestjs",
-  "version": "0.0.108",
+  "version": "0.0.109",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/festusyuma/fy-tools.git"
@@ -21,7 +21,7 @@
     "!**/*.tsbuildinfo"
   ],
   "dependencies": {
-    "@fy-tools/rpc-server": "0.0.108",
+    "@fy-tools/rpc-server": "0.0.109",
     "@nestjs/common": "11.0.11",
     "@nestjs/swagger": "11.1.5",
     "@standard-schema/spec": "^1.0.0",
