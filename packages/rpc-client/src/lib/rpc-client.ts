@@ -11,7 +11,7 @@ export function rpcClient<T extends App<Controller<any, any>[]>>(
   type Routes = T['_controllers'][number]['_routes'][number];
 
   const axios = Axios.create({
-    baseURL: options?.baseUrl,
+    ...(options ?? {}),
   });
 
   async function req(

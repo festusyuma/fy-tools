@@ -5,10 +5,18 @@ import type {
   Route,
 } from '@fy-tools/rpc-server';
 import { StandardSchemaV1 } from '@standard-schema/spec';
-import type { AxiosRequestConfig, AxiosResponse } from 'axios';
+import {
+  AxiosRequestConfig,
+  AxiosRequestInterceptorUse,
+  AxiosResponse,
+  AxiosResponseInterceptorUse,
+  CreateAxiosDefaults,
+  InternalAxiosRequestConfig,
+} from 'axios';
 
-export type RpcClientOptions = {
-  baseUrl?: string;
+export type RpcClientOptions = CreateAxiosDefaults & {
+  requestInterceptor?: AxiosRequestInterceptorUse<InternalAxiosRequestConfig>;
+  responseInterceptor?: AxiosResponseInterceptorUse<AxiosResponse>;
 };
 
 export type ApiRouteFunction<Arguments = any, Options = any, Response = any> = (
@@ -24,7 +32,10 @@ export type InferOptions<T extends ApiRouteFunction> =
 
 export type InferError<T> = T extends App<any, infer Error>
   ? {
-      [key in keyof Error]: Error[key] extends StandardSchemaV1<infer _, infer O>
+      [key in keyof Error]: Error[key] extends StandardSchemaV1<
+        infer _,
+        infer O
+      >
         ? O
         : never;
     }

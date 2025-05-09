@@ -12,7 +12,7 @@ export class AppError extends _AppError<NestApp> {
 
 export const client = rpcClient<NestApp>({
   /** Use axios instance options here */
-  baseUrl: 'http://127.0.0.1'
+  baseURL: 'http://127.0.0.1',
 });
 
 export const addUser = client('user').$post;
