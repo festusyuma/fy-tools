@@ -50,7 +50,7 @@ type StripNever<T> = {
   [K in keyof T as T[K] extends never ? never : K]: T[K];
 };
 
-type Parse<T> = T extends StandardSchemaV1<infer _, infer O> ? O : never;
+type Parse<T> = T extends StandardSchemaV1<infer I, infer _> ? I : never;
 
 type Payload<R> = R extends Route<
   any,
@@ -68,7 +68,7 @@ type Payload<R> = R extends Route<
   : never;
 
 type Response<R> = R extends Route<any, any, infer Response>
-  ? Parse<Response>
+  ? Response extends StandardSchemaV1<infer _, infer O> ? O : never
   : any;
 
 export type Client<R extends Route> = <
