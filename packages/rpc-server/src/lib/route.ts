@@ -11,7 +11,7 @@ export class Route<
   TBody extends JsonType | unknown = unknown,
   TParams extends JsonType | unknown = unknown,
   TQuery extends JsonType | unknown = unknown,
-  TAuth extends boolean = false
+  TAuth extends boolean = any
 > {
   _path: StripSlashes<TPath>;
   _response: TResponse | undefined;
