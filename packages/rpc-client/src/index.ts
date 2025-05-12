@@ -7,4 +7,5 @@ export type {
   InferOptions,
   InferPayload,
   InferResponse,
+  RpcClientOptions,
 } from './lib/types.js';
