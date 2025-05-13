@@ -1,6 +1,6 @@
 {
   "name": "@fy-tools/rpc-client",
-  "version": "0.0.111",
+  "version": "0.0.112",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/festusyuma/fy-tools.git"
@@ -26,6 +26,6 @@
     "tslib": "^2.3.0"
   },
   "peerDependencies": {
-    "@fy-tools/rpc-server": "0.0.111"
+    "@fy-tools/rpc-server": "0.0.112"
   }
 }
