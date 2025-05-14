@@ -26,6 +26,7 @@ export function rpcClient<T extends App<Controller<any, any>[]>>(
     });
 
     const queryString = Object.entries(payload?.query ?? {})
+      .filter(i => !!i[1])
       .map((q) => `${q[0]}=${q[1]}`)
       .join('&');
 
