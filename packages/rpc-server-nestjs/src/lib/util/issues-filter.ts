@@ -13,9 +13,7 @@ export class IssuesFilter implements ExceptionFilter {
     console.log("issues :: ", JSON.stringify(e.issues, null, 2))
 
     throw new HttpException(
-      { error: 'validation error: ' + e.message,
-        issues: e.issues,
-       },
+      { error: 'validation error: ' + e.message },
       
       HttpStatus.BAD_REQUEST
     );
