@@ -1,5 +1,8 @@
 import type { App, Controller } from '@fy-tools/rpc-server';
-import Axios, { AxiosInstance, type AxiosRequestConfig } from 'axios';
+import Axios, {
+  AxiosInstance,
+  type AxiosRequestConfig,
+} from 'axios';
 
 import { methods } from './constants.js';
 import type { Client, RpcClientOptions } from './types';
