@@ -1,4 +1,3 @@
-export { AppError } from './lib/app-error';
 export { rpcClient } from './lib/rpc-client.js';
 export type {
   ApiRouteFunction,
@@ -7,5 +6,4 @@ export type {
   InferOptions,
   InferPayload,
   InferResponse,
-  RpcClientOptions,
-} from './lib/types.js';
+  RpcClientOptions} from './lib/types.js';

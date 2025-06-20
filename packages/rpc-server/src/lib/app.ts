@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type { Controller } from './controller.js';
 import { JsonType, RouteByFullPath, RouteFullPath } from './types';
 
@@ -18,6 +16,7 @@ export class App<
   _errors = {} as TE;
   _routesMap: Record<string, [number, number]> = {};
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   controller<TC extends Controller<any, any>>(
     controller: TC
   ): App<MergeController<T, [TC]>, TE> {
@@ -34,7 +33,7 @@ export class App<
     return app;
   }
 
-  error<Status extends number, Body extends JsonType>(
+  error<Status extends number | 'default', Body extends JsonType>(
     status: Status,
     error: Body
   ) {

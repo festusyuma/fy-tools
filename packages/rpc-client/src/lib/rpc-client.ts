@@ -1,54 +1,59 @@
 import type { App, Controller } from '@fy-tools/rpc-server';
-import Axios, { AxiosError, type AxiosRequestConfig } from 'axios';
+import Axios, { AxiosInstance, type AxiosRequestConfig } from 'axios';
 
-import { AppError } from './app-error';
 import { methods } from './constants.js';
 import type { Client, RpcClientOptions } from './types';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function rpcClient<T extends App<Controller<any, any>[]>>(
   options?: RpcClientOptions
 ) {
   type Routes = T['_controllers'][number]['_routes'][number];
 
-  const axios = Axios.create({
-    ...(options ?? {}),
-  });
+  const axios = Axios.create(options);
 
   async function req(
     url: string,
     method: string,
-    payload?: any,
+    payload?: object,
     options?: AxiosRequestConfig
   ) {
-    const parsedUrl = (url as string).replace(/:\w+/g, (match) => {
-      const param = payload?.params?.[match.slice(1)];
-      return param ?? match;
+    const params: Record<string, string | number> = {};
+    if (payload && 'params' in payload) Object.assign(params, payload.params);
+
+    const parsedUrl = url.replace(/:\w+/g, (match) => {
+      const paramKey = match.slice(1);
+      return params[paramKey]?.toString() ?? match;
     });
 
-    const queryString = Object.entries(payload?.query ?? {})
-      .filter(i => !!i[1])
-      .map((q) => `${q[0]}=${q[1]}`)
-      .join('&');
+    let queryString = '';
 
-    try {
-      return await axios.request({
-        url: parsedUrl + '?' + queryString,
-        method,
-        data: payload?.body,
-        ...(options ?? {}),
-      });
-    } catch (e) {
-      throw new AppError(e as AxiosError);
+    if (payload && 'query' in payload) {
+      queryString = Object.entries(payload?.query ?? {})
+        .filter((i) => !!i[1])
+        .map((q) => `${q[0]}=${q[1]}`)
+        .join('&');
     }
+
+    return await axios.request({
+      method,
+      url: parsedUrl + '?' + queryString,
+      data: payload && 'body' in payload ? payload?.body : undefined,
+      ...(options ?? {}),
+    });
   }
 
-  return function client(url: string) {
+  function client(url: string) {
     return Object.fromEntries(
       Object.entries(methods).map((p) => [
         p[0],
-        (payload?: unknown, options?: AxiosRequestConfig) =>
+        (payload?: object, options?: AxiosRequestConfig) =>
           req(url, p[1], payload, options),
       ])
     );
-  } as Client<Routes>;
+  }
+
+  return Object.assign(client, { axios }) as Client<Routes> & {
+    axios: AxiosInstance;
+  };
 }

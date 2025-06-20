@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import type {
   App,
   IsRouteMethod,
@@ -6,17 +8,16 @@ import type {
 } from '@fy-tools/rpc-server';
 import { StandardSchemaV1 } from '@standard-schema/spec';
 import {
+  AxiosError,
   AxiosRequestConfig,
-  AxiosRequestInterceptorUse,
   AxiosResponse,
-  AxiosResponseInterceptorUse,
   CreateAxiosDefaults,
-  InternalAxiosRequestConfig,
+  HttpStatusCode
 } from 'axios';
 
 export type RpcClientOptions = CreateAxiosDefaults & {
-  requestInterceptor?: AxiosRequestInterceptorUse<InternalAxiosRequestConfig>;
-  responseInterceptor?: AxiosResponseInterceptorUse<AxiosResponse>;
+  onSuccess?: (payload: unknown) => unknown;
+  onError?: <T extends Error>(e: T) => unknown;
 };
 
 export type ApiRouteFunction<Arguments = any, Options = any, Response = any> = (
@@ -30,15 +31,23 @@ export type InferPayload<T extends ApiRouteFunction> =
 export type InferOptions<T extends ApiRouteFunction> =
   T extends ApiRouteFunction<any, infer Options> ? Options : never;
 
+type HttpStatus = typeof HttpStatusCode[keyof typeof HttpStatusCode]
+
 export type InferError<T> = T extends App<any, infer Error>
   ? {
       [key in keyof Error]: Error[key] extends StandardSchemaV1<
         infer _,
         infer O
       >
-        ? O
+        ? Omit<AxiosError, 'status' | 'response'> & {
+            status: key extends 'default' ? Exclude<HttpStatus, keyof Error> : key;
+            response: Omit<AxiosResponse, 'status' | 'data'> & {
+              status: key extends 'default' ? Exclude<HttpStatus, keyof Error> : key;
+              data: O;
+            };
+          }
         : never;
-    }
+    }[keyof Error]
   : never;
 
 export type InferResponse<T extends ApiRouteFunction> =
@@ -68,7 +77,9 @@ type Payload<R> = R extends Route<
   : never;
 
 type Response<R> = R extends Route<any, any, infer Response>
-  ? Response extends StandardSchemaV1<infer _, infer O> ? O : never
+  ? Response extends StandardSchemaV1<infer _, infer O>
+    ? O
+    : never
   : any;
 
 export type Client<R extends Route> = <
