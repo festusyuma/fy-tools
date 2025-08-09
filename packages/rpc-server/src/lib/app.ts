@@ -1,5 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import type { Controller } from './controller.js';
-import { JsonType, RouteByFullPath, RouteFullPath } from './types';
+import { JsonType } from './types';
+import { stripSlashes } from './util/strip-slashes';
 
 type MergeController<
   T extends readonly Controller[],
@@ -12,11 +15,10 @@ export class App<
     [key in never]: never;
   }
 > {
-  _controllers = [] as unknown as T;
   _errors = {} as TE;
-  _routesMap: Record<string, [number, number]> = {};
+  _controllers = [] as unknown as T;
+  _controllers_map: Record<string, number> = {};
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   controller<TC extends Controller<any, any>>(
     controller: TC
   ): App<MergeController<T, [TC]>, TE> {
@@ -24,11 +26,15 @@ export class App<
 
     const app = this as unknown as App<NewT, TE>;
     app._controllers = [...this._controllers, controller] as NewT;
+
     const controllerIndex = app._controllers.length - 1;
 
-    for (const i in controller._routes_map) {
-      this._routesMap[i] = [controllerIndex, controller._routes_map[i]];
-    }
+    const fullPathKey = `${stripSlashes(controller._basePath) || 'DEFAULT'}`
+      .toUpperCase()
+      .replaceAll('-', '__')
+      .replaceAll('/', '___');
+
+    this._controllers_map[fullPathKey] = controllerIndex;
 
     return app;
   }
@@ -42,14 +48,5 @@ export class App<
     app._errors = { ...app._errors, [status]: error };
 
     return app;
-  }
-
-  protected findRoute<
-    TRoutes extends (typeof this._controllers)[number]['_routes'][number],
-    TPath extends RouteFullPath<TRoutes>,
-    TResponse extends RouteByFullPath<TRoutes, TPath>
-  >(path: TPath): TResponse {
-    const [controllerIndex, routeIndex] = this._routesMap[path];
-    return this._controllers[controllerIndex]?._routes[routeIndex];
   }
 }

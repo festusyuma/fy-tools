@@ -1,18 +1,13 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import type { App, Controller } from '@fy-tools/rpc-server';
-import Axios, {
-  AxiosInstance,
-  type AxiosRequestConfig,
-} from 'axios';
+import Axios, { type AxiosRequestConfig } from 'axios';
 
-import { methods } from './constants.js';
-import type { Client, RpcClientOptions } from './types';
+import type { ClientV2, RpcClientOptions } from './types';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function rpcClient<T extends App<Controller<any, any>[]>>(
+export function rpcClient<Schema extends App<Controller<any, any>[]>>(
   options?: RpcClientOptions
 ) {
-  type Routes = T['_controllers'][number]['_routes'][number];
-
   const axios = Axios.create(options);
 
   async function req(
@@ -46,17 +41,37 @@ export function rpcClient<T extends App<Controller<any, any>[]>>(
     });
   }
 
-  function client(url: string) {
-    return Object.fromEntries(
-      Object.entries(methods).map((p) => [
-        p[0],
-        (payload?: object, options?: AxiosRequestConfig) =>
-          req(url, p[1], payload, options),
-      ])
-    );
-  }
+  const controllers = {} as ClientV2<Schema>;
 
-  return Object.assign(client, { axios }) as Client<Routes> & {
-    axios: AxiosInstance;
-  };
+  return new Proxy(controllers, {
+    get(_, controllerP): any {
+      const routes = {};
+      return new Proxy(routes, {
+        get(_, routeP) {
+          const controller = controllerP
+            .toString()
+            .replaceAll('DEFAULT', '')
+            .replace('___', '/')
+            .replaceAll('__', '-')
+            .toLowerCase();
+
+          const [method, route] = routeP
+            .toString()
+            .replaceAll('DEFAULT', '')
+            .replaceAll('___', '/')
+            .replaceAll('__', '-')
+            .toLowerCase()
+            .split('_');
+
+          return (payload?: object, options?: AxiosRequestConfig) =>
+            req(
+              `${controller}/${route}`,
+              method.split('$')[1],
+              payload,
+              options
+            );
+        },
+      });
+    },
+  });
 }

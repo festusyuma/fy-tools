@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { StandardSchemaV1 } from '@standard-schema/spec';
+import type { StandardSchemaV1 } from '@standard-schema/spec';
 
-import { Controller } from './controller';
+import type { Controller } from './controller';
 import type { Route } from './route.js';
 import type { HttpMethod } from './util/constants';
 
@@ -17,18 +17,42 @@ export type IsRouteMethod<
 > = TM extends HttpMethod ? (T extends Route<any, TM> ? T : never) : never;
 
 export type RouteFullPath<R> = R extends Route<infer Path, infer Method>
-  ? `${Method}: ${Path}`
+  ? `${Method}_${ParseRoute<Path>}`
+  : never;
+
+export type ControllerFullPath<C> = C extends Controller<infer Path, any[]>
+  ? ParseRoute<Path>
   : never;
 
 export type ControllerByFullPath<R, Path> = Path extends string
-  ? R extends Controller<Path, any>
+  ? R extends Controller<UnParseRoute<Path>, any>
     ? R
     : never
   : never;
 
-export type RouteByFullPath<R, P> = P extends `${infer Method}: ${infer Path}`
+export type ParseRoute<T> = T extends string
+  ? T extends ''
+    ? 'DEFAULT'
+    : T extends `${infer L}/${infer R}`
+    ? `${ParseRoute<L>}___${ParseRoute<R>}`
+    : T extends `${infer L}-${infer R}`
+    ? `${Uppercase<L>}__${ParseRoute<R>}`
+    : Uppercase<T>
+  : '';
+
+export type UnParseRoute<T> = T extends string
+  ? T extends 'DEFAULT'
+    ? ''
+    : T extends `${infer L}___${infer R}`
+    ? `${UnParseRoute<L>}/${UnParseRoute<R>}`
+    : T extends `${infer L}__${infer R}`
+    ? `${Lowercase<L>}-${UnParseRoute<R>}`
+    : Lowercase<T>
+  : '';
+
+export type RouteByFullPath<R, P> = P extends `${infer Method}_${infer Path}`
   ? Method extends HttpMethod
-    ? R extends Route<Path, Method>
+    ? R extends Route<UnParseRoute<Path>, Method>
       ? R
       : never
     : never
