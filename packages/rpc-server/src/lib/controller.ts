@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { Route } from './route.js';
-import { RoutePath, StripSlashes } from './types.js';
+import { StripSlashes } from './types.js';
 import { stripSlashes } from './util/strip-slashes.js';
 
 export type MergeRoute<
@@ -9,7 +9,7 @@ export type MergeRoute<
   TC extends readonly Route[]
 > = T extends never[] ? TC : [...T, ...TC];
 
-export type AddControllerRoute<BPath, T> = T extends Route<
+export type AddControllerRoute<T> = T extends Route<
   infer Path,
   infer Method,
   infer Response,
@@ -18,7 +18,7 @@ export type AddControllerRoute<BPath, T> = T extends Route<
   infer Query,
   infer Auth
 >
-  ? Route<RoutePath<BPath, Path>, Method, Response, Body, Params, Query, Auth>
+  ? Route<StripSlashes<Path>, Method, Response, Body, Params, Query, Auth>
   : never;
 
 export class Controller<
@@ -34,7 +34,7 @@ export class Controller<
   }
 
   route<TR extends Route>(route: TR) {
-    type ControllerRoute = AddControllerRoute<BTPath, TR>;
+    type ControllerRoute = AddControllerRoute<TR>;
     type NewTRoutes = MergeRoute<TRoutes, [ControllerRoute]>;
 
     const controller = this as unknown as Controller<BTPath, NewTRoutes>;
@@ -45,7 +45,11 @@ export class Controller<
     ] as NewTRoutes;
 
     const fullPathKey = stripSlashes(
-      `${route._method}: ${controller._basePath}/${route._path}`
+      `${route._method}_${`${
+        stripSlashes(route._path) || 'DEFAULT'
+      }`.toUpperCase()}`
+        .replaceAll('-', '__')
+        .replaceAll('/', '___')
     );
 
     this._routes_map[fullPathKey] = controller._routes.length - 1;

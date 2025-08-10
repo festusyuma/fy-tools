@@ -2,40 +2,33 @@ import {
   App as _App,
   Controller as _Controller,
   ControllerByFullPath,
-  RouteByFullPath,
-  RouteFullPath,
+  ControllerFullPath,
 } from '@fy-tools/rpc-server';
 
 import { Controller } from './controller';
-import { Route } from './route';
 import { AppConfig } from './types';
 
-export class App<TA extends _App<_Controller<any, any>[]>> {
-  _controllers: Record<string, any> = {};
-  _routes: Record<string, any> = {};
+export class App<Schema extends _App<_Controller<any, any>[]>> {
+  /**
+   * Controllers.
+   * @description Map of all controllers in the schema.
+   * */
+  public C: {
+    [key in ControllerFullPath<Schema['_controllers'][number]>]: Controller<
+      ControllerByFullPath<Schema['_controllers'][number], key>
+    >;
+  } = {} as {
+    [key in ControllerFullPath<Schema['_controllers'][number]>]: Controller<
+      ControllerByFullPath<Schema['_controllers'][number], key>
+    >;
+  };
 
-  constructor(public _schema: TA, config?: AppConfig) {
-    for (const i in _schema._controllers) {
-      const controller = new Controller(_schema._controllers[i], config);
-
-      this._routes = { ...this._routes, ...controller._routes };
-      this._controllers[controller._schema._basePath] = controller;
+  constructor(public _schema: Schema, config?: AppConfig) {
+    for (const i in _schema._controllers_map) {
+      this.C[i as keyof typeof this.C] = new Controller(
+        _schema._controllers[_schema._controllers_map[i]],
+        config
+      ) as (typeof this.C)[keyof typeof this.C];
     }
-  }
-
-  getController<
-    TControllers extends TA['_controllers'][number],
-    TPath extends TControllers['_basePath'],
-    TController extends ControllerByFullPath<TControllers, TPath>
-  >(path: TPath): Controller<TController> {
-    return this._controllers[path];
-  }
-
-  getRoute<
-    TRoutes extends TA['_controllers'][number]['_routes'][number],
-    TPath extends RouteFullPath<TRoutes>,
-    TRoute extends RouteByFullPath<TRoutes, TPath>
-  >(path: TPath): Route<TRoute> {
-    return this._routes[path];
   }
 }

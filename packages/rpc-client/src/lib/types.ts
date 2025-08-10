@@ -2,17 +2,22 @@
 
 import type {
   App,
+  Controller,
+  ControllerByFullPath,
+  ControllerFullPath,
   IsRouteMethod,
   IsRoutePath,
   Route,
+  RouteByFullPath,
+  RouteFullPath,
 } from '@fy-tools/rpc-server';
-import { StandardSchemaV1 } from '@standard-schema/spec';
-import {
+import type { StandardSchemaV1 } from '@standard-schema/spec';
+import type {
   AxiosError,
   AxiosRequestConfig,
   AxiosResponse,
   CreateAxiosDefaults,
-  HttpStatusCode
+  HttpStatusCode,
 } from 'axios';
 
 export type RpcClientOptions = CreateAxiosDefaults & {
@@ -31,7 +36,7 @@ export type InferPayload<T extends ApiRouteFunction> =
 export type InferOptions<T extends ApiRouteFunction> =
   T extends ApiRouteFunction<any, infer Options> ? Options : never;
 
-type HttpStatus = typeof HttpStatusCode[keyof typeof HttpStatusCode]
+type HttpStatus = (typeof HttpStatusCode)[keyof typeof HttpStatusCode];
 
 export type InferError<T> = T extends App<any, infer Error>
   ? {
@@ -40,9 +45,13 @@ export type InferError<T> = T extends App<any, infer Error>
         infer O
       >
         ? Omit<AxiosError, 'status' | 'response'> & {
-            status: key extends 'default' ? Exclude<HttpStatus, keyof Error> : key;
+            status: key extends 'default'
+              ? Exclude<HttpStatus, keyof Error>
+              : key;
             response: Omit<AxiosResponse, 'status' | 'data'> & {
-              status: key extends 'default' ? Exclude<HttpStatus, keyof Error> : key;
+              status: key extends 'default'
+                ? Exclude<HttpStatus, keyof Error>
+                : key;
               data: O;
             };
           }
@@ -96,4 +105,28 @@ export type Client<R extends Route> = <
     payload: TPayload,
     options?: Omit<AxiosRequestConfig<TPayload>, 'method' | 'data'>
   ) => Promise<AxiosResponse<TResponse>>;
+};
+
+export type ClientV2<Schema extends App<Controller<any, any>[]>> = {
+  [key in ControllerFullPath<Schema['_controllers'][number]>]: {
+    [RK in RouteFullPath<
+      ControllerByFullPath<
+        Schema['_controllers'][number],
+        key
+      >['_routes'][number]
+    >]: <
+      Route extends RouteByFullPath<
+        ControllerByFullPath<
+          Schema['_controllers'][number],
+          key
+        >['_routes'][number],
+        RK
+      >,
+      P extends Payload<Route>,
+      R extends Response<Route>
+    >(
+      payload: P,
+      options?: Omit<AxiosRequestConfig<P>, 'method' | 'data'>
+    ) => Promise<AxiosResponse<R>>;
+  };
 };
