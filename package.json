@@ -1,8 +1,11 @@
 {
   "name": "@fy-tools/source",
-  "version": "0.0.117",
+  "version": "0.0.118",
   "license": "MIT",
-  "scripts": {},
+  "scripts": {
+    "prepublish": "npx nx run-many -t build --parallel",
+    "publish": "npm publish --access public --workspaces"
+  },
   "private": true,
   "devDependencies": {
     "@eslint/js": "^9.8.0",
