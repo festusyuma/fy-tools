@@ -1,6 +1,6 @@
 {
   "name": "@fy-tools/rpc-server",
-  "version": "0.0.116",
+  "version": "0.0.117",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/festusyuma/fy-tools.git"

@@ -65,7 +65,7 @@ export function rpcClient<Schema extends App<Controller<any, any>[]>>(
 
           return (payload?: object, options?: AxiosRequestConfig) =>
             req(
-              `${controller}/${route}`,
+              `${controller}${route ? `/${route}` : ''}`,
               method.split('$')[1],
               payload,
               options
