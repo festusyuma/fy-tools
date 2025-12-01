@@ -29,10 +29,11 @@ export class App<
 
     const controllerIndex = app._controllers.length - 1;
 
-    const fullPathKey = `${stripSlashes(controller._basePath) || 'DEFAULT'}`
-      .toUpperCase()
+    const fullPathKey = `${stripSlashes(controller._basePath) || 'default'}`
+      .toLowerCase()
       .replaceAll('-', '__')
-      .replaceAll('/', '___');
+      .replaceAll('/', '___')
+      .replaceAll(':', '$');
 
     this._controllers_map[fullPathKey] = controllerIndex;
 

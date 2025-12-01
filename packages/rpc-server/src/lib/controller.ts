@@ -46,10 +46,11 @@ export class Controller<
 
     const fullPathKey = stripSlashes(
       `${route._method}_${`${
-        stripSlashes(route._path) || 'DEFAULT'
-      }`.toUpperCase()}`
+        stripSlashes(route._path) || 'default'
+      }`.toLowerCase()}`
         .replaceAll('-', '__')
         .replaceAll('/', '___')
+        .replaceAll(':', '$')
     );
 
     this._routes_map[fullPathKey] = controller._routes.length - 1;

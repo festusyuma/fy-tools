@@ -22,8 +22,8 @@
   ],
   "dependencies": {
     "@fy-tools/rpc-server": "0.0.118",
-    "@nestjs/common": "^11",
-    "@nestjs/swagger": "^11",
+    "@nestjs/common": "^11.1.9",
+    "@nestjs/swagger": "^11.2.3",
     "@standard-schema/spec": "^1.0.0",
     "tslib": "^2.3.0"
   }
