@@ -1,5 +1,5 @@
 import {
-  InferError,
+  type InferError,
   type InferPayload,
   type InferResponse,
   rpcClient,
@@ -23,4 +23,5 @@ export type AddUserPayload = InferPayload<typeof addUser>;
 export type AddUserResponse = InferResponse<typeof addUser>;
 
 export const getUsers = client.user.get_default;
+
 export const updateProfile = client.profile.patch_$id;
