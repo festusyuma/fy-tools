@@ -8,4 +8,7 @@ export type {
   InferPayload,
   InferResponse,
   RpcClientOptions,
+  HttpStatus,
+  Payload,
+  Response,
 } from './lib/types.js';

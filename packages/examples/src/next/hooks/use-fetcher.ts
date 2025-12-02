@@ -4,7 +4,7 @@ import type {
   InferPayload,
   InferResponse,
 } from '@fy-tools/rpc-client';
-import useSWR, { type Key, type SWRConfiguration } from 'swr';
+import useSWR, { type Key, type SWRConfiguration, type SWRResponse } from 'swr';
 
 import { AppError } from '../../client/client';
 
@@ -14,8 +14,8 @@ export function useFetcher<T extends ApiRouteFunction>(
   args: InferPayload<T>,
   options?: InferOptions<T>,
   config?: SWRConfiguration
-) {
-  return useSWR<InferResponse<T>, AppError>(
+): SWRResponse<InferResponse<T>, AppError> {
+  return useSWR(
     keys,
     async () => {
       const res = await getMethod(args, options);

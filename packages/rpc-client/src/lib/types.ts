@@ -36,7 +36,7 @@ export type InferPayload<T extends ApiRouteFunction> =
 export type InferOptions<T extends ApiRouteFunction> =
   T extends ApiRouteFunction<any, infer Options> ? Options : never;
 
-type HttpStatus = (typeof HttpStatusCode)[keyof typeof HttpStatusCode];
+export type HttpStatus = (typeof HttpStatusCode)[keyof typeof HttpStatusCode];
 
 export type InferError<T> = T extends App<any, infer Error>
   ? {
@@ -70,7 +70,7 @@ type StripNever<T> = {
 
 type Parse<T> = T extends StandardSchemaV1<infer I, infer _> ? I : never;
 
-type Payload<R> = R extends Route<
+export type Payload<R> = R extends Route<
   any,
   any,
   any,
@@ -85,7 +85,7 @@ type Payload<R> = R extends Route<
     }>
   : never;
 
-type Response<R> = R extends Route<any, any, infer Response>
+export type Response<R> = R extends Route<any, any, infer Response>
   ? Response extends StandardSchemaV1<infer _, infer O>
     ? O
     : never
