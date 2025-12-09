@@ -40,6 +40,26 @@ export class App<
     return app;
   }
 
+  app<TA extends App<Controller<any, any>[]>>(
+    app: TA
+  ): App<MergeController<T, TA['_controllers']>, TE> {
+    type NewT = MergeController<T, TA['_controllers']>;
+
+    let extendedApp = this as unknown as App<NewT, TE>;
+
+    for (const i in app._controllers) {
+      /**
+       * extendedApp will finally have the App<NewT, TE>
+       *   disabled because the controller type changes after every iteration,
+       *   but the final type will be App<NewT, TE>
+       **/
+      // @ts-expect-error invalid type
+      extendedApp = extendedApp.controller(app._controllers[i]);
+    }
+
+    return extendedApp;
+  }
+
   error<Status extends number | 'default', Body extends JsonType>(
     status: Status,
     error: Body
