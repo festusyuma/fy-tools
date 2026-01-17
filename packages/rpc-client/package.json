@@ -1,6 +1,6 @@
 {
   "name": "@fy-tools/rpc-client",
-  "version": "0.0.119-alpha.101",
+  "version": "0.0.119-alpha.102",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/festusyuma/fy-tools.git"
