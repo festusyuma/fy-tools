@@ -31,27 +31,27 @@ export type ControllerByFullPath<R, Path> = Path extends string
   : never;
 
 export type ParseRoute<T> = T extends string
-  ? T extends ''
+  ? T extends '' | undefined
     ? 'default'
     : T extends `${infer L}/${infer R}`
-      ? `${ParseRoute<L>}___${ParseRoute<R>}`
-      : T extends `${infer L}-${infer R}`
-        ? `${Lowercase<L>}__${ParseRoute<R>}`
-        : T extends `:${infer L}`
-          ? `$${ParseRoute<L>}`
-          : Lowercase<T>
+    ? `${ParseRoute<L>}___${ParseRoute<R>}`
+    : T extends `${infer L}-${infer R}`
+    ? `${Lowercase<L>}__${ParseRoute<R>}`
+    : T extends `:${infer L}`
+    ? `$${ParseRoute<L>}`
+    : Lowercase<T>
   : '';
 
 export type UnParseRoute<T> = T extends string
   ? T extends 'default'
     ? ''
     : T extends `${infer L}___${infer R}`
-      ? `${UnParseRoute<L>}/${UnParseRoute<R>}`
-      : T extends `${infer L}__${infer R}`
-        ? `${Lowercase<L>}-${UnParseRoute<R>}`
-        : T extends `$${infer L}`
-          ? `:${UnParseRoute<L>}`
-          : Lowercase<T>
+    ? `${UnParseRoute<L>}/${UnParseRoute<R>}`
+    : T extends `${infer L}__${infer R}`
+    ? `${Lowercase<L>}-${UnParseRoute<R>}`
+    : T extends `$${infer L}`
+    ? `:${UnParseRoute<L>}`
+    : Lowercase<T>
   : '';
 
 export type RouteByFullPath<R, P> = P extends `${infer Method}_${infer Path}`

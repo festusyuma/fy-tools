@@ -56,7 +56,7 @@ export function rpcClient<Schema extends App<Controller<any, any>[]>>(
             .replaceAll('$', ':')
             .toLowerCase();
 
-          const [method, route] = routeP
+          const [method, ...route] = routeP
             .toString()
             .replaceAll('default', '')
             .replaceAll('___', '/')
@@ -67,7 +67,7 @@ export function rpcClient<Schema extends App<Controller<any, any>[]>>(
 
           return (payload?: object, options?: AxiosRequestConfig) =>
             req(
-              `${controller}${route ? `/${route}` : ''}`,
+              `${controller}/${route?.length ? `/${route.join('_')}` : ''}`,
               method,
               payload,
               options

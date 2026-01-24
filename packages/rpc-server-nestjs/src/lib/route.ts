@@ -27,19 +27,6 @@ import { StandardSchemaV1 } from '@standard-schema/spec';
 import { IssuesFilter } from './util/issues-filter';
 import { ValidationError } from './util/validation-error';
 
-// const config = {
-//   toJsonSchema: {
-//     fallback: {
-//       date: (ctx) => ({
-//         ...ctx.base,
-//         type: 'string',
-//         format: 'date-time',
-//         description: ctx.after ? `after ${ctx.after.toISOString()}` : 'anytime',
-//       }),
-//     },
-//   },
-// };
-
 export class Route<Schema extends _Route<any, any, any, any, any, any, any>> {
   constructor(
     public _schema: Schema,
