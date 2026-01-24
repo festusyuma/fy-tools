@@ -67,7 +67,7 @@ export function rpcClient<Schema extends App<Controller<any, any>[]>>(
 
           return (payload?: object, options?: AxiosRequestConfig) =>
             req(
-              `${controller}/${route?.length ? `/${route.join('_')}` : ''}`,
+              `${controller}${route?.length ? `/${route.join('_')}` : ''}`,
               method,
               payload,
               options
