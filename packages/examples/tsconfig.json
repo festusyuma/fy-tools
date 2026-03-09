@@ -4,15 +4,6 @@
   "include": [],
   "references": [
     {
-      "path": "../rpc-server-nestjs"
-    },
-    {
-      "path": "../rpc-server"
-    },
-    {
-      "path": "../rpc-client"
-    },
-    {
       "path": "./tsconfig.lib.json"
     }
   ]
