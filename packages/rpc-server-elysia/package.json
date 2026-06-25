@@ -1,10 +1,10 @@
 {
-  "name": "@fy-tools/rpc-client",
+  "name": "@fy-tools/rpc-server-elysia",
   "version": "0.0.119-alpha.1038",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/festusyuma/fy-tools.git",
-    "directory": "packages/rpc-client"
+    "directory": "packages/rpc-server-elysia"
   },
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -22,11 +22,9 @@
     "!**/*.tsbuildinfo"
   ],
   "dependencies": {
-    "@standard-schema/spec": "^1.0.0",
-    "axios": "^1.13.6",
-    "tslib": "^2.3.0"
-  },
-  "peerDependencies": {
-    "@fy-tools/rpc-server": "0.0.119-alpha.1038"
+    "@fy-tools/rpc-server": "0.0.119-alpha.1038",
+    "elysia": "^1.4.29",
+    "tslib": "^2.3.0",
+    "@standard-schema/spec": "^1.0.0"
   }
 }

@@ -6,23 +6,12 @@
     "outDir": "dist",
     "tsBuildInfoFile": "dist/tsconfig.lib.tsbuildinfo",
     "emitDeclarationOnly": false,
-    "module": "esnext",
-    "moduleResolution": "bundler",
     "types": ["node"]
   },
   "include": ["src/**/*.ts"],
   "references": [
     {
-      "path": "../rpc-server-nestjs/tsconfig.lib.json"
-    },
-    {
       "path": "../rpc-server/tsconfig.lib.json"
-    },
-    {
-      "path": "../rpc-client-nextjs/tsconfig.lib.json"
-    },
-    {
-      "path": "../rpc-client/tsconfig.lib.json"
     }
   ]
 }

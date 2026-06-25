@@ -17,6 +17,12 @@
     },
     {
       "path": "./packages/rpc-client-nextjs"
+    },
+    {
+      "path": "./packages/rpc-server-elysia"
+    },
+    {
+      "path": "./packages/rpc-server-expressjs"
     }
   ]
 }

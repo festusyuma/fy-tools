@@ -2,9 +2,14 @@
 
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 
+import type { App } from './app.js';
 import type { Controller } from './controller';
 import type { Route } from './route.js';
 import type { HttpMethod } from './util/constants';
+
+export type AnyRoute = Route<any, any, any, any, any, any>;
+export type AnyController = Controller<any, any>;
+export type AnyApp = App<AnyController[]>;
 
 export type IsRoutePath<
   T extends Route,
@@ -91,6 +96,11 @@ export type Body<
   T extends Route,
   TK extends PropertyKey<T['_body']> | undefined = undefined
 > = RouteIn<T['_body'], TK>;
+
+export type Response<
+  T extends Route,
+  TK extends PropertyKey<T['_response']> | undefined = undefined
+> = RouteIn<T['_response'], TK>;
 
 export type Query<
   T extends Route,

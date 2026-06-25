@@ -24,7 +24,7 @@
     "nx": "22.5.4",
     "prettier": "^2.6.2",
     "tslib": "^2.3.0",
-    "typescript": "5.9.3",
+    "typescript": "^6.0.3",
     "typescript-eslint": "8.57.0",
     "verdaccio": "6.3.1"
   },

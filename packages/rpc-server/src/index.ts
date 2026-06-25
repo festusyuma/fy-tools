@@ -6,6 +6,9 @@ export {
 } from './lib/controller.js';
 export { Route } from './lib/route.js';
 export type {
+  AnyApp,
+  AnyController,
+  AnyRoute,
   Body,
   ControllerByFullPath,
   ControllerFullPath,
@@ -15,6 +18,7 @@ export type {
   Params,
   PropertyKey,
   Query,
+  Response,
   RouteByFullPath,
   RouteFullPath,
   RoutePath,
