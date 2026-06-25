@@ -3,7 +3,7 @@ import type {
   RouteByFullPath,
   RouteFullPath,
 } from '@fy-tools/rpc-server';
-import type { AnyElysia,Elysia } from 'elysia';
+import type { AnyElysia, Elysia } from 'elysia';
 
 import { Route } from './route';
 
@@ -21,16 +21,23 @@ export class Controller<
     const path = this._schema._basePath as Schema['_basePath'];
     const routes: Record<string, Route> = {};
 
-    this._app.group(path, (a) => {
+    const appGroup = this._app.group(path, (a) => {
+      let appGroup = a;
+
       for (const i in _schema._routes_map) {
-        routes[i as keyof typeof routes] = new Route(
+        const route = new Route(
           a as AnyElysia,
           this._schema._routes[_schema._routes_map[i]]
         );
+
+        appGroup = route._app;
+        routes[i as keyof typeof routes] = route;
       }
 
-      return a;
+      return appGroup;
     });
+
+    this._app = appGroup as App;
 
     this.R = new Proxy(
       routes as unknown as {

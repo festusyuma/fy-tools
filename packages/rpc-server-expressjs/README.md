@@ -1,11 +1,11 @@
-# @fy-tools/rpc-server-elysia
+# @fy-tools/rpc-server-expressjs
 
-Elysia adapter for `@fy-tools/rpc-server`. Pass your app schema and an Elysia instance — routes and groups are registered automatically, and handlers are fully type-safe.
+Express adapter for `@fy-tools/rpc-server`. Pass your app schema and an Express instance — routes are registered automatically, request validation is handled for you, and handler context is fully typed.
 
 ## Installation
 
 ```bash
-npm install @fy-tools/rpc-server-elysia elysia
+npm install @fy-tools/rpc-server-expressjs express
 ```
 
 ## Usage
@@ -52,32 +52,20 @@ export type Schema = typeof Schema;
 
 ### 2. Create the server
 
+Add any Express middleware before passing the app to `App` — JSON parsing is required for body validation to work.
+
 ```ts
-import { App } from '@fy-tools/rpc-server-elysia';
-import { Elysia } from 'elysia';
+import { App } from '@fy-tools/rpc-server-expressjs';
+import express from 'express';
 import { Schema } from './schema';
 
-const server = new App(new Elysia(), Schema);
+const expressApp = express();
+expressApp.use(express.json());
+
+const server = new App(expressApp, Schema);
 ```
 
-### 3. Add middleware
-
-Use `.build()` to apply Elysia plugins before handlers run. The returned `App` carries the updated Elysia type, so resolved/derived values are available in every handler.
-
-```ts
-const authMiddleware = new Elysia({ name: 'auth' }).resolve(
-  { as: 'global' },
-  async ({ headers }) => {
-    const token = headers.authorization?.split(' ')[1];
-    return { userId: await verifyToken(token) };
-  }
-);
-
-const server = new App(new Elysia(), Schema)
-  .build((app) => app.use(authMiddleware));
-```
-
-### 4. Implement handlers
+### 3. Implement handlers
 
 Access controllers via `.C` and routes via `.R`. For path encoding rules, see the [rpc-server README](../rpc-server/README.md#path-encoding).
 
@@ -88,7 +76,7 @@ server.C.auth.R.post_login.handler(async (ctx) => {
 });
 
 server.C.users.R.get_default.handler(async (ctx) => {
-  return { items: await db.users.findAll({ userId: ctx.userId }) };
+  return { items: await db.users.findAll() };
 });
 
 server.C.users.R.get_$id.handler(async (ctx) => {
@@ -100,13 +88,29 @@ server.C.users.R.delete_$id.handler(async (ctx) => {
 });
 ```
 
-`ctx.body`, `ctx.query`, `ctx.params` are typed from the schema. Anything added via `.build()` (e.g. `ctx.userId` above) is also fully typed.
-
-### 5. Start the server
+### 4. Start the server
 
 ```ts
 server._app.listen(3000);
 ```
+
+---
+
+## Handler context
+
+The context passed to each handler contains:
+
+| Property | Type | Description |
+|---|---|---|
+| `body` | Inferred from schema | Validated and parsed request body |
+| `params` | Inferred from schema | Validated URL path parameters |
+| `query` | Inferred from schema | Validated query string parameters |
+| `req` | `express.Request` | Raw Express request object |
+| `res` | `express.Response` | Raw Express response object |
+
+Validation runs automatically before the handler is called. If body, params, or query fail their schema, the route responds with `400` and a validation error — the handler is not invoked.
+
+The return value of the handler is automatically sent as JSON. If you need to send a custom response (e.g. set headers, stream a file), call `res` directly and return anything — the adapter skips auto-send if headers have already been sent.
 
 ---
 
@@ -115,25 +119,25 @@ server._app.listen(3000);
 ### `App`
 
 ```ts
-new App(app: AnyElysia, schema: AnyApp)
+new App(app: Application, schema: AnyApp)
 ```
 
-Registers all controllers from the schema onto the Elysia instance.
+Registers all controllers from the schema onto the Express instance.
 
 | Member | Description |
 |---|---|
 | `.C` | Typed proxy of all controllers, keyed by encoded path |
-| `.build(fn)` | Applies middleware and returns a new `App` with the updated type |
-| `._app` | The underlying Elysia instance — call `.listen()` on this |
+| `.build(fn)` | Transforms the Express app and returns a new `App` |
+| `._app` | The underlying Express instance — call `.listen()` on this |
 
 ### `Controller`
 
-Instantiated automatically by `App`. Wraps a single controller schema as an Elysia group.
+Instantiated automatically by `App`. Creates an Express `Router` and mounts it at the controller's base path.
 
 | Member | Description |
 |---|---|
 | `.R` | Typed proxy of all routes in the controller, keyed by encoded method + path |
-| `.build(fn)` | Applies middleware scoped to this controller |
+| `.build(fn)` | Transforms the Express app and returns a new `Controller` |
 
 ### `Route`
 
@@ -142,4 +146,4 @@ Instantiated automatically by `Controller`. Wraps a single route schema.
 | Member | Description |
 |---|---|
 | `.handler(fn)` | Sets the request handler — called from `.R` on a controller |
-| `.build(fn)` | Applies middleware scoped to this route |
+| `.build(fn)` | Transforms the Express router and returns a new `Route` |

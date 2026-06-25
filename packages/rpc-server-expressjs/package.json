@@ -1,10 +1,10 @@
 {
-  "name": "@fy-tools/rpc-client",
+  "name": "@fy-tools/rpc-server-expressjs",
   "version": "0.0.119-alpha.10387",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/festusyuma/fy-tools.git",
-    "directory": "packages/rpc-client"
+    "directory": "packages/rpc-server-expressjs"
   },
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -22,11 +22,14 @@
     "!**/*.tsbuildinfo"
   ],
   "dependencies": {
-    "@standard-schema/spec": "^1.0.0",
-    "axios": "^1.13.6",
+    "@fy-tools/rpc-server": "0.0.119-alpha.10387",
+    "express": "^4.21.2",
     "tslib": "^2.3.0"
   },
+  "devDependencies": {
+    "@types/express": "^4.17.21"
+  },
   "peerDependencies": {
-    "@fy-tools/rpc-server": "0.0.119-alpha.10387"
+    "express": "^4.21.2"
   }
 }

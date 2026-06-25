@@ -3,25 +3,23 @@ import type {
   ControllerByFullPath,
   ControllerFullPath,
 } from '@fy-tools/rpc-server';
-import type { AnyElysia } from 'elysia';
+import type { Application } from 'express';
 
 import { Controller } from './controller';
 
-export class App<App extends AnyElysia, Schema extends AnyApp> {
+export class App<ExpressApp extends Application = Application, Schema extends AnyApp = AnyApp> {
   /**
    * Controllers.
    * @description Map of all controllers in the schema.
    * */
   public C = {} as {
     [key in ControllerFullPath<Schema['_controllers'][number]>]: Controller<
-      App,
+      ExpressApp,
       ControllerByFullPath<Schema['_controllers'][number], key>
     >;
   };
 
-  constructor(public _app: App, public _schema: Schema) {
-    console.log('preparing app ', this._app, this._schema);
-
+  constructor(public _app: ExpressApp, public _schema: Schema) {
     for (const i in _schema._controllers_map) {
       const controller = new Controller(
         this._app,
@@ -33,8 +31,7 @@ export class App<App extends AnyElysia, Schema extends AnyApp> {
     }
   }
 
-  build<T extends AnyElysia>(fn: (app: App) => T) {
-    const newApp = fn(this._app);
-    return new App<T, Schema>(newApp, this._schema);
+  build<T extends Application>(fn: (app: ExpressApp) => T) {
+    return new App<T, Schema>(fn(this._app), this._schema);
   }
 }
