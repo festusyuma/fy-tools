@@ -1,5 +1,5 @@
-import type { AnyRoute,Body, Params, Query } from '@fy-tools/rpc-server';
-import type { Request, Response } from 'express';
+import type { AnyRoute, Body, Params, Query } from '@fy-tools/rpc-server';
+import type { NextFunction, Request, Response } from 'express';
 
 export type RouteToContext<Schema extends AnyRoute> = {
   body: Body<Schema>;
@@ -7,4 +7,5 @@ export type RouteToContext<Schema extends AnyRoute> = {
   query: Query<Schema>;
   req: Request;
   res: Response;
+  next: NextFunction;
 };

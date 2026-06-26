@@ -21,13 +21,10 @@ export class App<ExpressApp extends Application = Application, Schema extends An
 
   constructor(public _app: ExpressApp, public _schema: Schema) {
     for (const i in _schema._controllers_map) {
-      const controller = new Controller(
+      this.C[i as keyof typeof this.C] = new Controller(
         this._app,
         _schema._controllers[_schema._controllers_map[i]]
       ) as (typeof this.C)[keyof typeof this.C];
-
-      this._app = controller._app;
-      this.C[i as keyof typeof this.C] = controller;
     }
   }
 

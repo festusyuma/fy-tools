@@ -26,3 +26,4 @@ export type {
 export { HttpMethod } from './lib/util/constants.js';
 export { ErrorSchemaKeys } from './lib/util/constants.js';
 export { stripSlashes } from './lib/util/strip-slashes.js';
+export { ValidationError } from './lib/util/validation-error.js';

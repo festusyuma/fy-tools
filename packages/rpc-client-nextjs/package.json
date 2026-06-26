@@ -1,6 +1,6 @@
 {
   "name": "@fy-tools/rpc-client-nextjs",
-  "version": "0.0.119-alpha.10387",
+  "version": "0.0.119-alpha.10391",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/festusyuma/fy-tools.git",
@@ -33,10 +33,10 @@
   ],
   "dependencies": {
     "tslib": "^2.3.0",
-    "@fy-tools/rpc-client": "0.0.119-alpha.10387",
-    "axios": "^1.13.6",
+    "@fy-tools/rpc-client": "0.0.119-alpha.10391",
+    "axios": "^1.18.1",
     "react-hot-toast": "2.5.2",
-    "next": "16.1.6",
+    "next": "16.2.9",
     "swr": "^2.4.1"
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@fy-tools/rpc-server-expressjs",
-  "version": "0.0.119-alpha.10387",
+  "version": "0.0.119-alpha.10391",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/festusyuma/fy-tools.git",
@@ -22,7 +22,7 @@
     "!**/*.tsbuildinfo"
   ],
   "dependencies": {
-    "@fy-tools/rpc-server": "0.0.119-alpha.10387",
+    "@fy-tools/rpc-server": "0.0.119-alpha.10391",
     "express": "^4.21.2",
     "tslib": "^2.3.0"
   },

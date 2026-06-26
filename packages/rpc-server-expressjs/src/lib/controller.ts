@@ -22,20 +22,15 @@ export class Controller<
     const router: Router = express.Router();
     const routes: Record<string, Route> = {};
 
-    let currentRouter: Router = router;
-
     for (const i in _schema._routes_map) {
-      const route = new Route(
-        currentRouter,
-        _schema._routes[_schema._routes_map[i]]
-      );
-
-      currentRouter = route._app;
-      routes[i] = route;
+      routes[i] = new Route(router, _schema._routes[_schema._routes_map[i]]);
     }
 
-    const basePath = this._schema._basePath ? `/${this._schema._basePath}` : '/';
-    this._app.use(basePath, currentRouter);
+    const basePath = this._schema._basePath
+      ? `/${this._schema._basePath}`
+      : '/';
+
+    this._app.use(basePath, router);
 
     this.R = new Proxy(
       routes as unknown as {

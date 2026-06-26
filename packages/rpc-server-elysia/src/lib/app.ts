@@ -20,8 +20,6 @@ export class App<App extends AnyElysia, Schema extends AnyApp> {
   };
 
   constructor(public _app: App, public _schema: Schema) {
-    console.log('preparing app ', this._app, this._schema);
-
     for (const i in _schema._controllers_map) {
       const controller = new Controller(
         this._app,

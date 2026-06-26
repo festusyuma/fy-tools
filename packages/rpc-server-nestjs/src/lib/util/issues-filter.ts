@@ -1,11 +1,10 @@
+import { ValidationError } from '@fy-tools/rpc-server';
 import {
   Catch,
   ExceptionFilter,
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
-
-import { ValidationError } from './validation-error';
 
 @Catch(ValidationError)
 export class IssuesFilter implements ExceptionFilter {
