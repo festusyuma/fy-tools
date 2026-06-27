@@ -13,16 +13,16 @@ export type {
   JsonType,
   Params,
   ParseRoute,
-  WithParsedRoute,
   PropertyKey,
   Query,
   Response,
   RouteByFullPath,
   RouteFullPath,
   RoutePath,
+  WithParsedRoute,
 } from './lib/types.js';
 export { HttpMethod } from './lib/util/constants.js';
 export { ErrorSchemaKeys } from './lib/util/constants.js';
-export { stripSlashes } from './lib/util/strip-slashes.js';
 export { makeFlatProxy } from './lib/util/make-flat-proxy.js';
+export { stripSlashes } from './lib/util/strip-slashes.js';
 export { ValidationError } from './lib/util/validation-error.js';

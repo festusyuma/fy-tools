@@ -1,7 +1,7 @@
 import {
   Controller as _Controller,
-  Route as _R,
   makeFlatProxy,
+  Route as _R,
 } from '@fy-tools/rpc-server';
 import { applyDecorators, Controller as N_Controller } from '@nestjs/common';
 

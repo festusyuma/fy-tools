@@ -5,7 +5,9 @@ import Axios, { AxiosInstance, type AxiosRequestConfig } from 'axios';
 
 import type { Client, RpcClientOptions } from './types';
 
-export function rpcClient<Schema extends AnyApp>(options?: RpcClientOptions): Client<Schema> & { axios: AxiosInstance } {
+export function rpcClient<Schema extends AnyApp>(
+  options?: RpcClientOptions
+): Client<Schema> & { axios: AxiosInstance } {
   const axios = Axios.create(options);
 
   async function req(
@@ -39,41 +41,46 @@ export function rpcClient<Schema extends AnyApp>(options?: RpcClientOptions): Cl
     });
   }
 
-  const controllers = {} as Client<Schema> & { axios: AxiosInstance };
+  const HTTP_METHODS = new Set([
+    'GET',
+    'POST',
+    'PUT',
+    'PATCH',
+    'DELETE',
+    'HEAD',
+    'OPTIONS',
+    'SEARCH',
+    'ALL',
+  ]);
 
-  return new Proxy(controllers, {
-    get(_, controllerP): any {
-      if (controllerP === 'axios') return axios;
+  function makeProxy(path: string): any {
+    return new Proxy(
+      {},
+      {
+        get(_, prop) {
+          if (prop === 'axios') return axios;
+          const segment = prop.toString();
 
-      const routes = {};
-      return new Proxy(routes, {
-        get(_, routeP) {
-          const controller = controllerP
-            .toString()
-            .replaceAll('default', '')
-            .replace('___', '/')
-            .replaceAll('__', '-')
-            .replaceAll('$', ':')
-            .toLowerCase();
+          if (HTTP_METHODS.has(segment)) {
+            const originalUrlSegment = path.split('.');
+            const urlSegments: string[] = [];
 
-          const [method, ...route] = routeP
-            .toString()
-            .replaceAll('default', '')
-            .replaceAll('___', '/')
-            .replaceAll('__', '-')
-            .replaceAll('$', ':')
-            .toLowerCase()
-            .split('_');
+            for (const seg of originalUrlSegment) {
+              if (seg === 'default') continue;
+              urlSegments.push(seg.replaceAll('_', '-').replaceAll('$', ':'));
+            }
 
-          return (payload?: object, options?: AxiosRequestConfig) =>
-            req(
-              `${controller}${route?.length ? `/${route.join('_')}` : ''}`,
-              method,
-              payload,
-              options
-            );
+            const url = urlSegments.length ? `/${urlSegments.join('/')}` : '/';
+
+            return (payload?: object, options?: AxiosRequestConfig) =>
+              req(url, segment, payload, options);
+          }
+
+          return makeProxy(path ? `${path}.${segment}` : segment);
         },
-      });
-    },
-  });
+      }
+    );
+  }
+
+  return makeProxy('') as Client<Schema> & { axios: AxiosInstance };
 }

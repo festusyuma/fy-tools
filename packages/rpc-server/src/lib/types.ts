@@ -38,7 +38,7 @@ export type ControllerByFullPath<R, Path> = Path extends string
     : never
   : never;
 
-export type ParseRoute<UT, Path extends object = {}> = UT extends string
+export type ParseRoute<UT, Path extends object = object> = UT extends string
   ? Lowercase<StripSlashes<UT>> extends infer T
     ? T extends '' | undefined
       ? Path & { default: true }
@@ -59,22 +59,6 @@ export type WithParsedRoute<T extends object, W> = {
     ? WithParsedRoute<T[K], W>
     : T[K];
 };
-
-// export type UnParseRoute<T> = T extends object
-//   ? T extends 'default'
-//     ? ''
-//     : T extends `${infer L}___${infer R}`
-//     ? `${UnParseRoute<L>}/${UnParseRoute<R>}`
-//     : T extends `${infer L}__${infer R}`
-//     ? `${Lowercase<L>}-${UnParseRoute<R>}`
-//     : T extends `$${infer L}`
-//     ? `:${UnParseRoute<L>}`
-//     : Lowercase<T>
-//   : '';
-
-// export type RouteMap<R> = {
-//   [K in R as RouteFullPath<K>]: K;
-// };
 
 export type RouteByFullPath<R, P> = P extends `${infer Method}$$${infer Path}`
   ? Method extends HttpMethod

@@ -1,16 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type {
-  App,
   AnyApp,
-  AnyRoute,
   AnyController,
+  AnyRoute,
+  App,
   Route,
 } from '@fy-tools/rpc-server';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 import type {
-  AxiosInstance,
   AxiosError,
+  AxiosInstance,
   AxiosRequestConfig,
   AxiosResponse,
   CreateAxiosDefaults,
@@ -105,4 +105,4 @@ type DeepReplace<T> = {
 
 export type Client<Schema extends AnyApp> = DeepReplace<Schema['_controllers']>;
 
-export type { AxiosRequestConfig, AxiosResponse, AxiosInstance };
+export type { AxiosInstance,AxiosRequestConfig, AxiosResponse };

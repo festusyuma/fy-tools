@@ -20,7 +20,7 @@ export class Controller<
       WithParsedRoute<
         ParseRoute<`${TR['_path'] extends '' | undefined
           ? 'default'
-          : TR['_path']}/${TR['_method']}`>,
+          : TR['_path']}/${Uppercase<TR['_method']>}`>,
         TR
       >;
 
@@ -31,7 +31,7 @@ export class Controller<
         .replaceAll('-', '_')
         .replaceAll('/', '.')
         .replaceAll(':', '$')
-    )}.${route._method}`;
+    )}.${route._method.toUpperCase()}`;
 
     console.log('full path :: ', fullPathKey);
 

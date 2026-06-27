@@ -1,7 +1,7 @@
 import {
   AnyController,
-  Route as _R,
   makeFlatProxy,
+  Route as _R,
 } from '@fy-tools/rpc-server';
 import type { Application, Router } from 'express';
 import express from 'express';
