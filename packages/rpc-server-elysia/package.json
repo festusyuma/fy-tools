@@ -1,6 +1,6 @@
 {
   "name": "@fy-tools/rpc-server-elysia",
-  "version": "0.0.119-alpha.10398",
+  "version": "0.0.119-alpha.10402",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/festusyuma/fy-tools.git",
@@ -22,7 +22,7 @@
     "!**/*.tsbuildinfo"
   ],
   "dependencies": {
-    "@fy-tools/rpc-server": "0.0.119-alpha.10398",
+    "@fy-tools/rpc-server": "0.0.119-alpha.10402",
     "elysia": "^1.4.29",
     "tslib": "^2.3.0",
     "@standard-schema/spec": "^1.0.0"

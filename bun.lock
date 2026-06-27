@@ -45,7 +45,7 @@
     },
     "packages/rpc-client": {
       "name": "@fy-tools/rpc-client",
-      "version": "0.0.119-alpha.10398",
+      "version": "0.0.119-alpha.10401",
       "dependencies": {
         "@standard-schema/spec": "^1.0.0",
         "axios": "^1.18.1",
@@ -57,7 +57,7 @@
     },
     "packages/rpc-client-nextjs": {
       "name": "@fy-tools/rpc-client-nextjs",
-      "version": "0.0.119-alpha.10398",
+      "version": "0.0.119-alpha.10401",
       "dependencies": {
         "@fy-tools/rpc-client": "0.0.119-alpha.10397",
         "axios": "^1.18.1",
@@ -69,7 +69,7 @@
     },
     "packages/rpc-server": {
       "name": "@fy-tools/rpc-server",
-      "version": "0.0.119-alpha.10398",
+      "version": "0.0.119-alpha.10401",
       "dependencies": {
         "@standard-schema/spec": "^1.0.0",
         "tslib": "^2.3.0",
@@ -77,9 +77,9 @@
     },
     "packages/rpc-server-elysia": {
       "name": "@fy-tools/rpc-server-elysia",
-      "version": "0.0.119-alpha.10398",
+      "version": "0.0.119-alpha.10401",
       "dependencies": {
-        "@fy-tools/rpc-server": "0.0.119-alpha.10397",
+        "@fy-tools/rpc-server": "0.0.119-alpha.10401",
         "@standard-schema/spec": "^1.0.0",
         "elysia": "^1.4.29",
         "tslib": "^2.3.0",
@@ -87,7 +87,7 @@
     },
     "packages/rpc-server-expressjs": {
       "name": "@fy-tools/rpc-server-expressjs",
-      "version": "0.0.119-alpha.10398",
+      "version": "0.0.119-alpha.10401",
       "dependencies": {
         "@fy-tools/rpc-server": "0.0.119-alpha.1038",
         "express": "^4.21.2",
@@ -102,7 +102,7 @@
     },
     "packages/rpc-server-nestjs": {
       "name": "@fy-tools/rpc-server-nestjs",
-      "version": "0.0.119-alpha.10398",
+      "version": "0.0.119-alpha.10401",
       "dependencies": {
         "@fy-tools/rpc-server": "0.0.119-alpha.10397",
         "@nestjs/common": "^11.1.9",
