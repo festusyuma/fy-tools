@@ -8,6 +8,16 @@ import express from 'express';
 
 import { Route } from './route';
 
+type ExpressRouteDeepReplace<T> = {
+  [K in keyof T]: 0 extends 1 & T[K]
+    ? T[K]
+    : T[K] extends _R
+    ? Route<Router, T[K]>
+    : T[K] extends object
+    ? ExpressRouteDeepReplace<T[K]>
+    : T[K];
+};
+
 export class Controller<
   App extends Application = Application,
   Schema extends AnyController = AnyController
@@ -33,15 +43,7 @@ export class Controller<
 
     this._app.use(basePath, router);
 
-    type DeepReplace<T> = {
-      [K in keyof T]: T[K] extends _R
-        ? Route<Router, T[K]>
-        : T[K] extends object
-        ? DeepReplace<T[K]>
-        : T[K];
-    };
-
-    type RouteMap = DeepReplace<Schema['_routes']>;
+    type RouteMap = ExpressRouteDeepReplace<Schema['_routes']>;
 
     this.R = makeFlatProxy(this.routes) as RouteMap;
   }
