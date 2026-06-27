@@ -1,13 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { App, Controller } from '@fy-tools/rpc-server';
+import type { AnyApp } from '@fy-tools/rpc-server';
 import Axios, { AxiosInstance, type AxiosRequestConfig } from 'axios';
 
-import type { ClientV2, RpcClientOptions } from './types';
+import type { Client, RpcClientOptions } from './types';
 
-export function rpcClient<Schema extends App<Controller<any, any>[]>>(
-  options?: RpcClientOptions
-) {
+export function rpcClient<Schema extends AnyApp>(options?: RpcClientOptions): Client<Schema> & { axios: AxiosInstance } {
   const axios = Axios.create(options);
 
   async function req(
@@ -41,7 +39,7 @@ export function rpcClient<Schema extends App<Controller<any, any>[]>>(
     });
   }
 
-  const controllers = {} as ClientV2<Schema> & { axios: AxiosInstance };
+  const controllers = {} as Client<Schema> & { axios: AxiosInstance };
 
   return new Proxy(controllers, {
     get(_, controllerP): any {

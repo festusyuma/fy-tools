@@ -2,7 +2,6 @@ export { rpcClient } from './lib/rpc-client.js';
 export type {
   ApiRouteFunction,
   Client,
-  ClientV2,
   HttpStatus,
   InferError,
   InferOptions,
@@ -11,4 +10,7 @@ export type {
   Payload,
   Response,
   RpcClientOptions,
+  AxiosInstance,
+  AxiosResponse,
+  AxiosRequestConfig,
 } from './lib/types.js';
