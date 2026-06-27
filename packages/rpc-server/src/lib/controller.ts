@@ -20,7 +20,7 @@ export class Controller<
       WithParsedRoute<
         ParseRoute<`${TR['_path'] extends '' | undefined
           ? 'default'
-          : TR['_path']}/${Uppercase<TR['_method']>}`>,
+          : Lowercase<TR['_path']>}/${Uppercase<TR['_method']>}`>,
         TR
       >;
 
@@ -37,7 +37,7 @@ export class Controller<
 
     controller._routes = {
       ...this._routes,
-      [fullPathKey]: route,
+      [fullPathKey]: route
     } as NewTRoutes;
 
     return controller;

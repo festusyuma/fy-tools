@@ -39,7 +39,7 @@ export type ControllerByFullPath<R, Path> = Path extends string
   : never;
 
 export type ParseRoute<UT, Path extends object = object> = UT extends string
-  ? Lowercase<StripSlashes<UT>> extends infer T
+  ? StripSlashes<UT> extends infer T
     ? T extends '' | undefined
       ? Path & { default: true }
       : T extends `${infer L}-${infer R}`
