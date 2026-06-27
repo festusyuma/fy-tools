@@ -1,17 +1,11 @@
-import type {
-  AnyRoute,
-  Body,
-  Params,
-  Query,
-  Response,
-} from '@fy-tools/rpc-server';
+import { AnyRoute, Body, Params, Query, Response } from '@fy-tools/rpc-server';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
-import type { AnyElysia, Elysia } from 'elysia';
+import type { AnyElysia } from 'elysia';
 
 import { RouteToContext } from './types';
 
 export class Route<
-  App extends AnyElysia = Elysia,
+  App extends AnyElysia = AnyElysia,
   Schema extends AnyRoute = AnyRoute
 > {
   private _handlerFn = (ctx: unknown) => {
@@ -45,7 +39,7 @@ export class Route<
     return new Route<T, Schema>(newApp, this._schema);
   }
 
-  handler<RouteContext extends RouteToContext<App, Schema>>(
+  handler<RouteContext extends RouteToContext<typeof this>>(
     fn: (ctx: RouteContext) => Promise<Response<Schema>>
   ) {
     this._handlerFn = fn as typeof this._handlerFn;

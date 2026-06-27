@@ -3,16 +3,17 @@ import type {
   Params,
   Query,
   Response,
-  Route,
+  Route as _Route,
 } from '@fy-tools/rpc-server';
 import { StandardSchemaV1 } from '@standard-schema/spec';
 import type {
-  AnyElysia,
   CreateEden,
   Elysia,
   InferContext,
   MergeElysiaInstances,
 } from 'elysia';
+
+import type { Route } from './route';
 
 export type RouteInputSchema = {
   body?: StandardSchemaV1;
@@ -20,19 +21,18 @@ export type RouteInputSchema = {
   params?: StandardSchemaV1;
 };
 
-export type RouteToContext<A extends AnyElysia, T extends Route> = Omit<
-  InferContext<A>,
-  'body' | 'params' | 'query'
-> & {
-  body: Body<T>;
-  params: Params<T>;
-  query: Query<T>;
-};
+export type RouteToContext<R> = R extends Route<infer A, infer T>
+  ? Omit<InferContext<A>, 'body' | 'params' | 'query'> & {
+      body: Body<T>;
+      params: Params<T>;
+      query: Query<T>;
+    }
+  : never;
 
 export type InstanceFromRoute<
   App,
   AppRoute,
-  Schema extends Route
+  Schema extends _Route
 > = App extends Elysia<
   infer Path,
   infer Singleton,
@@ -54,7 +54,7 @@ export type InstanceFromRoute<
               CreateEden<
                 Schema['_path'],
                 {
-                  get: {
+                  [K in Schema['_method']]: {
                     body: Body<Schema>;
                     query: Query<Schema>;
                     params: Params<Schema>;
@@ -71,3 +71,7 @@ export type InstanceFromRoute<
       ]
     >
   : never;
+
+export type HandlerFunction<T extends Route> = (
+  ctx: RouteToContext<T>
+) => Promise<Response<T['_schema']>> | Response<T['_schema']>;

@@ -1,59 +1,44 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { Route } from './route.js';
-import { StripSlashes } from './types.js';
+import { ParseRoute, StripSlashes, WithParsedRoute } from './types.js';
 import { stripSlashes } from './util/strip-slashes.js';
-
-export type MergeRoute<
-  T extends readonly Route[],
-  TC extends readonly Route[]
-> = T extends never[] ? TC : [...T, ...TC];
-
-export type AddControllerRoute<T> = T extends Route<
-  infer Path,
-  infer Method,
-  infer Response,
-  infer Body,
-  infer Params,
-  infer Query,
-  infer Auth
->
-  ? Route<StripSlashes<Path>, Method, Response, Body, Params, Query, Auth>
-  : never;
 
 export class Controller<
   BTPath extends string | undefined = any,
-  TRoutes extends Route[] = never[]
+  TRoutes extends object = object
 > {
   _basePath: StripSlashes<BTPath>;
-  _routes = [] as unknown as TRoutes;
-  _routes_map: Record<string, number> = {};
+  _routes = {} as unknown as TRoutes;
 
   constructor(basePath = undefined as BTPath) {
     this._basePath = stripSlashes(basePath);
   }
 
   route<TR extends Route>(route: TR) {
-    type ControllerRoute = AddControllerRoute<TR>;
-    type NewTRoutes = MergeRoute<TRoutes, [ControllerRoute]>;
+    type NewTRoutes = TRoutes &
+      WithParsedRoute<
+        ParseRoute<`${TR['_path'] extends '' | undefined
+          ? 'default'
+          : TR['_path']}/${TR['_method']}`>,
+        TR
+      >;
 
     const controller = this as unknown as Controller<BTPath, NewTRoutes>;
 
-    controller._routes = [
-      ...this._routes,
-      route as unknown as ControllerRoute,
-    ] as NewTRoutes;
-
-    const fullPathKey = stripSlashes(
-      `${route._method}_${`${
-        stripSlashes(route._path) || 'default'
-      }`.toLowerCase()}`
-        .replaceAll('-', '__')
-        .replaceAll('/', '___')
+    const fullPathKey = `${stripSlashes(
+      `${`${stripSlashes(route._path) || 'default'}`.toLowerCase()}`
+        .replaceAll('-', '_')
+        .replaceAll('/', '.')
         .replaceAll(':', '$')
-    );
+    )}.${route._method}`;
 
-    this._routes_map[fullPathKey] = controller._routes.length - 1;
+    console.log('full path :: ', fullPathKey);
+
+    controller._routes = {
+      ...this._routes,
+      [fullPathKey]: route,
+    } as NewTRoutes;
 
     return controller;
   }

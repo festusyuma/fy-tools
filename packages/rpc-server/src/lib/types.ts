@@ -7,9 +7,9 @@ import type { Controller } from './controller';
 import type { Route } from './route.js';
 import type { HttpMethod } from './util/constants';
 
-export type AnyRoute = Route<any, any, any, any, any, any>;
+export type AnyRoute = Route<any, any, any, any, any, any, any>;
 export type AnyController = Controller<any, any>;
-export type AnyApp = App<AnyController[]>;
+export type AnyApp = App<any, any>;
 
 export type IsRoutePath<
   T extends Route,
@@ -22,7 +22,9 @@ export type IsRouteMethod<
 > = TM extends HttpMethod ? (T extends Route<any, TM> ? T : never) : never;
 
 export type RouteFullPath<R> = R extends Route<infer Path, infer Method>
-  ? `${Method}_${ParseRoute<Path>}`
+  ? ParseRoute<Path> extends object
+    ? ParseRoute<Path>
+    : `${Method}$$${Path}`
   : never;
 
 export type ControllerFullPath<C> = C extends Controller<infer Path, any[]>
@@ -30,38 +32,54 @@ export type ControllerFullPath<C> = C extends Controller<infer Path, any[]>
   : never;
 
 export type ControllerByFullPath<R, Path> = Path extends string
-  ? R extends Controller<UnParseRoute<Path>, any>
+  ? // ? R extends Controller<UnParseRoute<Path>, any>
+    R extends Controller<Path, any>
     ? R
     : never
   : never;
 
-export type ParseRoute<T> = T extends string
-  ? T extends '' | undefined
-    ? 'default'
-    : T extends `${infer L}/${infer R}`
-    ? `${ParseRoute<L>}___${ParseRoute<R>}`
-    : T extends `${infer L}-${infer R}`
-    ? `${Lowercase<L>}__${ParseRoute<R>}`
-    : T extends `:${infer L}`
-    ? `$${ParseRoute<L>}`
-    : Lowercase<T>
-  : '';
+export type ParseRoute<UT, Path extends object = {}> = UT extends string
+  ? Lowercase<StripSlashes<UT>> extends infer T
+    ? T extends '' | undefined
+      ? Path & { default: true }
+      : T extends `${infer L}-${infer R}`
+      ? ParseRoute<`${L}_${R}`, Path>
+      : T extends `${infer L}:${infer R}`
+      ? ParseRoute<`${L}$${R}`, Path>
+      : T extends `${infer L}/${infer R}`
+      ? Path & { [NP in L]: ParseRoute<R> }
+      : Path & { [A in T extends string ? T : never]: true }
+    : Path
+  : Path;
 
-export type UnParseRoute<T> = T extends string
-  ? T extends 'default'
-    ? ''
-    : T extends `${infer L}___${infer R}`
-    ? `${UnParseRoute<L>}/${UnParseRoute<R>}`
-    : T extends `${infer L}__${infer R}`
-    ? `${Lowercase<L>}-${UnParseRoute<R>}`
-    : T extends `$${infer L}`
-    ? `:${UnParseRoute<L>}`
-    : Lowercase<T>
-  : '';
+export type WithParsedRoute<T extends object, W> = {
+  [K in keyof T]: T[K] extends true
+    ? W
+    : T[K] extends object
+    ? WithParsedRoute<T[K], W>
+    : T[K];
+};
 
-export type RouteByFullPath<R, P> = P extends `${infer Method}_${infer Path}`
+// export type UnParseRoute<T> = T extends object
+//   ? T extends 'default'
+//     ? ''
+//     : T extends `${infer L}___${infer R}`
+//     ? `${UnParseRoute<L>}/${UnParseRoute<R>}`
+//     : T extends `${infer L}__${infer R}`
+//     ? `${Lowercase<L>}-${UnParseRoute<R>}`
+//     : T extends `$${infer L}`
+//     ? `:${UnParseRoute<L>}`
+//     : Lowercase<T>
+//   : '';
+
+// export type RouteMap<R> = {
+//   [K in R as RouteFullPath<K>]: K;
+// };
+
+export type RouteByFullPath<R, P> = P extends `${infer Method}$$${infer Path}`
   ? Method extends HttpMethod
-    ? R extends Route<UnParseRoute<Path>, Method>
+    ? // ? R extends Route<UnParseRoute<Path>, Method>
+      R extends Route<Path, Method>
       ? R
       : never
     : never
