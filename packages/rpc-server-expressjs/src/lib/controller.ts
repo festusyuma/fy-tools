@@ -1,7 +1,7 @@
-import type {
+import {
   AnyController,
-  RouteByFullPath,
-  RouteFullPath,
+  Route as _R,
+  makeFlatProxy,
 } from '@fy-tools/rpc-server';
 import type { Application, Router } from 'express';
 import express from 'express';
@@ -12,6 +12,8 @@ export class Controller<
   App extends Application = Application,
   Schema extends AnyController = AnyController
 > {
+  private routes: Record<string, Route> = {};
+
   /**
    * Requests.
    * @description Map of all requests in the schema.
@@ -20,10 +22,9 @@ export class Controller<
 
   constructor(public _app: App, public _schema: Schema) {
     const router: Router = express.Router();
-    const routes: Record<string, Route> = {};
 
-    for (const i in _schema._routes_map) {
-      routes[i] = new Route(router, _schema._routes[_schema._routes_map[i]]);
+    for (const i in _schema._routes) {
+      this.routes[i] = new Route(router, _schema._routes[i]);
     }
 
     const basePath = this._schema._basePath
@@ -32,19 +33,17 @@ export class Controller<
 
     this._app.use(basePath, router);
 
-    this.R = new Proxy(
-      routes as unknown as {
-        [key in RouteFullPath<Schema['_routes'][number]>]: Route<
-          Router,
-          RouteByFullPath<Schema['_routes'][number], key>
-        >;
-      },
-      {
-        get(target, p) {
-          return routes[p as keyof typeof routes];
-        },
-      }
-    );
+    type DeepReplace<T> = {
+      [K in keyof T]: T[K] extends _R
+        ? Route<Router, T[K]>
+        : T[K] extends object
+        ? DeepReplace<T[K]>
+        : T[K];
+    };
+
+    type RouteMap = DeepReplace<Schema['_routes']>;
+
+    this.R = makeFlatProxy(this.routes) as RouteMap;
   }
 
   build<T extends Application>(fn: (app: App) => T) {
