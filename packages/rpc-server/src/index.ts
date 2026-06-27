@@ -13,6 +13,7 @@ export type {
   JsonType,
   Params,
   ParseRoute,
+  WithParsedRoute,
   PropertyKey,
   Query,
   Response,
