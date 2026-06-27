@@ -5,11 +5,48 @@ import {
 } from '@fy-tools/rpc-server';
 import { AnyElysia, Elysia } from 'elysia';
 
+type GetRouteApp<
+  A extends AnyElysia,
+  BasePath extends string
+> = A extends Elysia<
+  infer _,
+  infer Singleton,
+  infer Definitions,
+  infer Metadata,
+  infer Routes,
+  infer Ephemeral,
+  infer Volatile
+>
+  ? Elysia<
+      BasePath,
+      Singleton,
+      Definitions,
+      Metadata,
+      Routes,
+      Ephemeral,
+      Volatile
+    >
+  : never;
+
+type ElysiaDeepReplace<T, RA extends AnyElysia> = {
+  [K in keyof T]: 0 extends 1 & T[K]
+    ? T[K]
+    : T[K] extends _R
+    ? Route<RA, T[K]>
+    : T[K] extends object
+    ? ElysiaDeepReplace<T[K], RA>
+    : T[K];
+};
+
 import { Route } from './route';
 
 export class Controller<
   App extends AnyElysia = Elysia,
-  Schema extends AnyController = AnyController
+  Schema extends AnyController = AnyController,
+  RouteMap = ElysiaDeepReplace<
+    Schema['_routes'],
+    GetRouteApp<App, Schema['_basePath']>
+  >
 > {
   private routes: Record<string, Route> = {};
 
@@ -17,16 +54,16 @@ export class Controller<
    * Requests.
    * @description Map of all requests in the schema.
    * */
-  public R;
+  public R: RouteMap;
 
   constructor(public _app: App, public _schema: Schema) {
     const path = this._schema._basePath as Schema['_basePath'];
 
-    const appGroup = this._app.group(path, (a) => {
-      let appGroup = a;
+    const appGroup = (this._app as AnyElysia).group(path, (a: AnyElysia) => {
+      let appGroup: AnyElysia = a;
 
       for (const i in _schema._routes) {
-        const route = new Route(a as AnyElysia, this._schema._routes[i]);
+        const route = new Route(a, this._schema._routes[i]);
 
         appGroup = route._app;
         this.routes[i as keyof typeof this.routes] = route;
@@ -36,36 +73,6 @@ export class Controller<
     });
 
     this._app = appGroup as App;
-
-    type RouteApp = App extends Elysia<
-      infer _,
-      infer Singleton,
-      infer Definitions,
-      infer Metadata,
-      infer Routes,
-      infer Ephemeral,
-      infer Volatile
-    >
-      ? Elysia<
-          Schema['_basePath'],
-          Singleton,
-          Definitions,
-          Metadata,
-          Routes,
-          Ephemeral,
-          Volatile
-        >
-      : never;
-
-    type DeepReplace<T> = {
-      [K in keyof T]: T[K] extends _R
-        ? Route<RouteApp, T[K]>
-        : T[K] extends object
-        ? DeepReplace<T[K]>
-        : T[K];
-    };
-
-    type RouteMap = DeepReplace<Schema['_routes']>;
 
     this.R = makeFlatProxy(this.routes) as RouteMap;
   }

@@ -1,5 +1,4 @@
-import { AnyRoute, Body, Params, Query, Response } from '@fy-tools/rpc-server';
-import type { StandardSchemaV1 } from '@standard-schema/spec';
+import { AnyRoute, Response } from '@fy-tools/rpc-server';
 import type { AnyElysia } from 'elysia';
 
 import { RouteToContext } from './types';
@@ -13,18 +12,15 @@ export class Route<
   };
 
   constructor(public _app: App, public _schema: Schema) {
-    const response = this._schema._response as StandardSchemaV1<
-      Response<Schema>
-    >;
-
+    const response = this._schema._response as Response<Schema['_response']>;
     const routeSchema = {
       response: { 200: response },
-      body: this._schema._body as StandardSchemaV1<Body<Schema>>,
-      params: this._schema._params as StandardSchemaV1<Params<Schema>>,
-      query: this._schema._query as StandardSchemaV1<Query<Schema>>,
+      body: this._schema._body as Schema['_body'],
+      params: this._schema._params as Schema['_params'],
+      query: this._schema._query as Schema['_query'],
     };
 
-    const route = this._app.route(
+    const route = (this._app as AnyElysia).route(
       this._schema._method.toUpperCase() as Uppercase<Schema['_method']>,
       this._schema._path as Schema['_path'],
       (ctx: unknown) => this._handlerFn(ctx) as any,
@@ -40,7 +36,7 @@ export class Route<
   }
 
   handler<RouteContext extends RouteToContext<typeof this>>(
-    fn: (ctx: RouteContext) => Promise<Response<Schema>>
+    fn: (ctx: RouteContext) => Promise<Response<Schema>> | Response<Schema>
   ) {
     this._handlerFn = fn as typeof this._handlerFn;
   }
