@@ -291,3 +291,15 @@ export const Schema = new App()
 
 export type Schema = typeof Schema;
 ```
+
+---
+
+## Server adapters
+
+Once you have a schema, plug it into the adapter for your framework:
+
+| Package | Framework |
+|---|---|
+| [`@fy-tools/rpc-server-elysia`](../rpc-server-elysia/README.md) | Elysia |
+| [`@fy-tools/rpc-server-expressjs`](../rpc-server-expressjs/README.md) | Express |
+| [`@fy-tools/rpc-server-nestjs`](../rpc-server-nestjs/README.md) | NestJS |
