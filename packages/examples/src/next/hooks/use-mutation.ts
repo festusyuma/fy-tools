@@ -5,7 +5,10 @@ import type {
   InferResponse,
 } from '@fy-tools/rpc-client';
 import type { Key } from 'swr';
-import useSWRMutation, { type SWRMutationConfiguration } from 'swr/mutation';
+import useSWRMutation, {
+  type SWRMutationConfiguration,
+  SWRMutationResponse,
+} from 'swr/mutation';
 
 import type { AppError } from '../../client/client';
 
@@ -14,8 +17,8 @@ export function useMutation<T extends ApiRouteFunction>(
   apiMethod: T,
   options?: InferOptions<T>,
   config?: SWRMutationConfiguration<InferResponse<T>, AppError>
-) {
-  return useSWRMutation<InferResponse<T>, AppError, Key, InferPayload<T>>(
+): SWRMutationResponse<InferResponse<T>, AppError, Key, InferPayload<T>> {
+  return useSWRMutation(
     keys,
     async (key: Key, { arg }: { arg: InferPayload<T> }) => {
       const res = await apiMethod(arg, options);
@@ -23,6 +26,14 @@ export function useMutation<T extends ApiRouteFunction>(
     },
     {
       throwOnError: false,
+      onError(e) {
+        switch (e.status) {
+          case 400:
+            break;
+          default:
+            console.error(e.response.data);
+        }
+      },
       ...(config ?? {}),
     }
   );

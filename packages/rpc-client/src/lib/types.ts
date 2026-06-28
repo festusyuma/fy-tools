@@ -1,19 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type {
+  AnyApp,
+  AnyController,
+  AnyRoute,
   App,
-  Controller,
-  ControllerByFullPath,
-  ControllerFullPath,
-  IsRouteMethod,
-  IsRoutePath,
   Route,
-  RouteByFullPath,
-  RouteFullPath,
 } from '@fy-tools/rpc-server';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 import type {
   AxiosError,
+  AxiosInstance,
   AxiosRequestConfig,
   AxiosResponse,
   CreateAxiosDefaults,
@@ -36,7 +33,7 @@ export type InferPayload<T extends ApiRouteFunction> =
 export type InferOptions<T extends ApiRouteFunction> =
   T extends ApiRouteFunction<any, infer Options> ? Options : never;
 
-type HttpStatus = (typeof HttpStatusCode)[keyof typeof HttpStatusCode];
+export type HttpStatus = (typeof HttpStatusCode)[keyof typeof HttpStatusCode];
 
 export type InferError<T> = T extends App<any, infer Error>
   ? {
@@ -70,7 +67,7 @@ type StripNever<T> = {
 
 type Parse<T> = T extends StandardSchemaV1<infer I, infer _> ? I : never;
 
-type Payload<R> = R extends Route<
+export type Payload<R> = R extends Route<
   any,
   any,
   any,
@@ -85,48 +82,27 @@ type Payload<R> = R extends Route<
     }>
   : never;
 
-type Response<R> = R extends Route<any, any, infer Response>
+export type Response<R> = R extends Route<any, any, infer Response>
   ? Response extends StandardSchemaV1<infer _, infer O>
     ? O
     : never
   : any;
 
-export type Client<R extends Route> = <
-  TPath extends R['_path'],
-  TRoute extends IsRoutePath<R, TPath>
->(
-  path: TPath
-) => {
-  [key in TRoute['_method']]: <
-    TMethodRoute extends IsRouteMethod<TRoute, key>,
-    TPayload extends Payload<TMethodRoute>,
-    TResponse extends Response<TMethodRoute>
-  >(
-    payload: TPayload,
-    options?: Omit<AxiosRequestConfig<TPayload>, 'method' | 'data'>
-  ) => Promise<AxiosResponse<TResponse>>;
+type DeepReplace<T> = {
+  [K in keyof T]: 0 extends 1 & T[K]
+    ? T[K]
+    : T[K] extends AnyController
+    ? DeepReplace<T[K]['_routes']>
+    : T[K] extends AnyRoute
+    ? (
+        payload: Payload<T[K]>,
+        options?: Omit<AxiosRequestConfig<Payload<T[K]>>, 'method' | 'data'>
+      ) => Promise<AxiosResponse<Response<T[K]>>>
+    : T[K] extends object
+    ? DeepReplace<T[K]>
+    : T[K];
 };
 
-export type ClientV2<Schema extends App<Controller<any, any>[]>> = {
-  [key in ControllerFullPath<Schema['_controllers'][number]>]: {
-    [RK in RouteFullPath<
-      ControllerByFullPath<
-        Schema['_controllers'][number],
-        key
-      >['_routes'][number]
-    >]: <
-      Route extends RouteByFullPath<
-        ControllerByFullPath<
-          Schema['_controllers'][number],
-          key
-        >['_routes'][number],
-        RK
-      >,
-      P extends Payload<Route>,
-      R extends Response<Route>
-    >(
-      payload: P,
-      options?: Omit<AxiosRequestConfig<P>, 'method' | 'data'>
-    ) => Promise<AxiosResponse<R>>;
-  };
-};
+export type Client<Schema extends AnyApp> = DeepReplace<Schema['_controllers']>;
+
+export type { AxiosInstance,AxiosRequestConfig, AxiosResponse };

@@ -33,6 +33,7 @@ const NestApp = new App()
     )
   )
   .error(401, type({ error: 'string' }))
-  .error(400, type({ errors: 'string[]' }));
+  .error(400, type({ errors: 'string[]' }))
+  .error('default', type('object'));
 
 export type NestApp = typeof NestApp;

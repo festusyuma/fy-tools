@@ -19,15 +19,14 @@ addUser(
   .catch((e: AppError) => {
     /** Error types are inferred based on status */
 
-    e.Status(400)?.Error((err) => {
-      console.error("errors occurred :: ", err.errors.join(', '))
-    });
-
-    e.Status(401)?.Error((err) => {
-      console.error("unauthorized error :: ", err.error)
-    });
-
-    e.Status(0)?.Error(() => {
-      console.error("unknown error :: ", e.error.message)
-    });
+    switch (e.status) {
+      case 400:
+        console.error('errors occurred :: ', e.response.data.errors.join(', '));
+        break;
+      case 401:
+        console.error('errors occurred :: ', e.response.data.error);
+        break;
+      default:
+        console.error('unknown error :: ', e.response.data);
+    }
   });

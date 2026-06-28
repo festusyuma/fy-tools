@@ -1,34 +1,34 @@
-import {
-  App as _App,
-  Controller as _Controller,
-  ControllerByFullPath,
-  ControllerFullPath,
-} from '@fy-tools/rpc-server';
+import { AnyApp, Controller as _C, makeFlatProxy } from '@fy-tools/rpc-server';
 
 import { Controller } from './controller';
 import { AppConfig } from './types';
 
-export class App<Schema extends _App<_Controller<any, any>[]>> {
+type NestControllerDeepReplace<T> = {
+  [K in keyof T]: 0 extends 1 & T[K]
+    ? T[K]
+    : T[K] extends _C
+    ? Controller<T[K]>
+    : T[K] extends object
+    ? NestControllerDeepReplace<T[K]>
+    : T[K];
+};
+
+export class App<Schema extends AnyApp = AnyApp> {
+  private controllers: Record<string, Controller<any>> = {};
+
   /**
    * Controllers.
    * @description Map of all controllers in the schema.
    * */
-  public C: {
-    [key in ControllerFullPath<Schema['_controllers'][number]>]: Controller<
-      ControllerByFullPath<Schema['_controllers'][number], key>
-    >;
-  } = {} as {
-    [key in ControllerFullPath<Schema['_controllers'][number]>]: Controller<
-      ControllerByFullPath<Schema['_controllers'][number], key>
-    >;
-  };
+  public C;
 
   constructor(public _schema: Schema, config?: AppConfig) {
-    for (const i in _schema._controllers_map) {
-      this.C[i as keyof typeof this.C] = new Controller(
-        _schema._controllers[_schema._controllers_map[i]],
-        config
-      ) as (typeof this.C)[keyof typeof this.C];
+    for (const i in _schema._controllers) {
+      this.controllers[i] = new Controller(_schema._controllers[i], config);
     }
+
+    type ControllerMap = NestControllerDeepReplace<Schema['_controllers']>;
+
+    this.C = makeFlatProxy(this.controllers) as ControllerMap;
   }
 }

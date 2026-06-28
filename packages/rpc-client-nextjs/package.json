@@ -1,0 +1,42 @@
+{
+  "name": "@fy-tools/rpc-client-nextjs",
+  "version": "0.0.119-alpha.10407",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/festusyuma/fy-tools.git",
+    "directory": "packages/rpc-client-nextjs"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./server": {
+      "types": "./dist/server.d.ts",
+      "import": "./dist/server.js",
+      "default": "./dist/server.js"
+    },
+    "./client": {
+      "types": "./dist/client.d.ts",
+      "import": "./dist/client.js",
+      "default": "./dist/client.js"
+    }
+  },
+  "files": [
+    "dist",
+    "!**/*.tsbuildinfo"
+  ],
+  "dependencies": {
+    "tslib": "^2.3.0",
+    "@fy-tools/rpc-client": "0.0.119-alpha.10407",
+    "axios": "^1.18.1",
+    "react-hot-toast": "2.5.2",
+    "next": "16.2.9",
+    "swr": "^2.4.1"
+  }
+}

@@ -1,9 +1,10 @@
 {
   "name": "@fy-tools/rpc-client",
-  "version": "0.0.118",
+  "version": "0.0.119-alpha.10407",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/festusyuma/fy-tools.git"
+    "url": "git+https://github.com/festusyuma/fy-tools.git",
+    "directory": "packages/rpc-client"
   },
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -22,10 +23,10 @@
   ],
   "dependencies": {
     "@standard-schema/spec": "^1.0.0",
-    "axios": "1.9.0",
+    "axios": "^1.18.1",
     "tslib": "^2.3.0"
   },
   "peerDependencies": {
-    "@fy-tools/rpc-server": "0.0.118"
+    "@fy-tools/rpc-server": "0.0.119-alpha.10407"
   }
 }

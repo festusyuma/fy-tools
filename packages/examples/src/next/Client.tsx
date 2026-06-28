@@ -5,8 +5,6 @@ import { useFetcher } from './hooks/use-fetcher';
 import { useMutation } from './hooks/use-mutation';
 
 export function Client() {
-  const [error, setError] = useState<string>()
-
   const { data } = useFetcher(['users'], getUsers, {});
   const { trigger } = useMutation(
     ['users'],
@@ -15,15 +13,6 @@ export function Client() {
     {
       onSuccess(data) {
         console.log(data.success);
-      },
-      onError(err) {
-        err.Status(400).Error(err => {
-          setError(err.errors.join(', '))
-        });
-
-        err.Status(401).Error(err => {
-          setError(err.error)
-        });
       },
     }
   );
@@ -43,10 +32,7 @@ export function Client() {
       >
         client
       </div>
-      {
-        error &&
-        <p>{error}</p>
-      }
+      {error && <p>{error}</p>}
     </div>
   );
 }

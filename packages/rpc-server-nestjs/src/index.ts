@@ -1,3 +1,3 @@
-export { App } from "./lib/app"
+export { App } from './lib/app';
 export { Controller } from './lib/controller.js';
-export { Route } from "./lib/route.js"
+export { Route } from './lib/route.js';

@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { App, Controller } from '@fy-tools/rpc-server';
-import Axios, { type AxiosRequestConfig } from 'axios';
+import type { AnyApp } from '@fy-tools/rpc-server';
+import Axios, { AxiosInstance, type AxiosRequestConfig } from 'axios';
 
-import type { ClientV2, RpcClientOptions } from './types';
+import type { Client, RpcClientOptions } from './types';
 
-export function rpcClient<Schema extends App<Controller<any, any>[]>>(
+export function rpcClient<Schema extends AnyApp>(
   options?: RpcClientOptions
-) {
+): Client<Schema> & { axios: AxiosInstance } {
   const axios = Axios.create(options);
 
   async function req(
@@ -41,37 +41,46 @@ export function rpcClient<Schema extends App<Controller<any, any>[]>>(
     });
   }
 
-  const controllers = {} as ClientV2<Schema>;
+  const HTTP_METHODS = new Set([
+    'GET',
+    'POST',
+    'PUT',
+    'PATCH',
+    'DELETE',
+    'HEAD',
+    'OPTIONS',
+    'SEARCH',
+    'ALL',
+  ]);
 
-  return new Proxy(controllers, {
-    get(_, controllerP): any {
-      const routes = {};
-      return new Proxy(routes, {
-        get(_, routeP) {
-          const controller = controllerP
-            .toString()
-            .replaceAll('DEFAULT', '')
-            .replace('___', '/')
-            .replaceAll('__', '-')
-            .toLowerCase();
+  function makeProxy(path: string): any {
+    return new Proxy(
+      {},
+      {
+        get(_, prop) {
+          if (prop === 'axios') return axios;
+          const segment = prop.toString();
 
-          const [method, route] = routeP
-            .toString()
-            .replaceAll('DEFAULT', '')
-            .replaceAll('___', '/')
-            .replaceAll('__', '-')
-            .toLowerCase()
-            .split('_');
+          if (HTTP_METHODS.has(segment)) {
+            const originalUrlSegment = path.split('.');
+            const urlSegments: string[] = [];
 
-          return (payload?: object, options?: AxiosRequestConfig) =>
-            req(
-              `${controller}${route ? `/${route}` : ''}`,
-              method.split('$')[1],
-              payload,
-              options
-            );
+            for (const seg of originalUrlSegment) {
+              if (seg === 'default') continue;
+              urlSegments.push(seg.replaceAll('$', ':'));
+            }
+
+            const url = urlSegments.length ? `/${urlSegments.join('/')}` : '/';
+
+            return (payload?: object, options?: AxiosRequestConfig) =>
+              req(url, segment, payload, options);
+          }
+
+          return makeProxy(path ? `${path}.${segment}` : segment);
         },
-      });
-    },
-  });
+      }
+    );
+  }
+
+  return makeProxy('') as Client<Schema> & { axios: AxiosInstance };
 }
