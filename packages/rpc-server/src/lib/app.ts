@@ -22,7 +22,6 @@ export class App<
 
     const fullPathKey = `${stripSlashes(controller._basePath) || 'default'}`
       .toLowerCase()
-      .replaceAll('-', '_')
       .replaceAll('/', '.')
       .replaceAll(':', '$');
 

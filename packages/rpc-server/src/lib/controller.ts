@@ -28,7 +28,6 @@ export class Controller<
 
     const fullPathKey = `${stripSlashes(
       `${`${stripSlashes(route._path) || 'default'}`.toLowerCase()}`
-        .replaceAll('-', '_')
         .replaceAll('/', '.')
         .replaceAll(':', '$')
     )}.${route._method.toUpperCase()}`;

@@ -194,7 +194,6 @@ Controllers and routes are addressed through a proxy that encodes path segments 
 | Path element | Encoded form |
 |---|---|
 | `/` (path separator) | creates nesting — access via chained properties |
-| `-` (hyphen) | `_` (underscore) |
 | `:param` (URL parameter) | `$param` |
 | empty / root path | `default` |
 
@@ -207,7 +206,7 @@ A controller is accessed via `App.C.<key>`. For controllers whose base path cont
 | `'users'` | `C.users` |
 | `''` or `undefined` | `C.default` |
 | `'auth/custom'` | `C.auth.custom` |
-| `'auth-service'` | `C.auth_service` |
+| `'auth-service'` | `C['auth-service']` |
 
 ### Route keys
 
@@ -220,7 +219,7 @@ Routes are accessed via `Controller.R.<path>.<METHOD>`. The path uses the same e
 | `POST /login` | `.R.login.POST` |
 | `GET /stats/dashboard` | `.R.stats.dashboard.GET` |
 | `GET /:id` | `.R.$id.GET` |
-| `PUT /voucher-request` | `.R.voucher_request.PUT` |
+| `PUT /voucher-request` | `.R['voucher-request'].PUT` |
 | `POST /promo_release` | `.R.promo_release.POST` |
 
 ---

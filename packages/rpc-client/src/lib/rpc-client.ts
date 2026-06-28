@@ -67,7 +67,7 @@ export function rpcClient<Schema extends AnyApp>(
 
             for (const seg of originalUrlSegment) {
               if (seg === 'default') continue;
-              urlSegments.push(seg.replaceAll('_', '-').replaceAll('$', ':'));
+              urlSegments.push(seg.replaceAll('$', ':'));
             }
 
             const url = urlSegments.length ? `/${urlSegments.join('/')}` : '/';

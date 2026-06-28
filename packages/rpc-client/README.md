@@ -111,7 +111,6 @@ Client property keys are derived from the schema using these rules:
 | Path element | Encoded form |
 |---|---|
 | `/` (path separator) | creates nesting — access via chained properties |
-| `-` (hyphen) | `_` (underscore) |
 | `:param` (URL param) | `$param` |
 | empty / root path | `default` |
 
@@ -125,7 +124,7 @@ The HTTP method is always **uppercase** and is the **last** property in the chai
 | `Route('/', GET)` on `users` | `client.users.default.GET(...)` |
 | `Route('stats/dashboard', GET)` | `client.stats.dashboard.GET(...)` |
 | `Route(':id', GET)` on `users` | `client.users.$id.GET(...)` |
-| `Route('voucher-request', POST)` | `client.voucher.voucher_request.POST(...)` |
+| `Route('voucher-request', POST)` | `client.voucher['voucher-request'].POST(...)` |
 | `Route('promo_release', GET)` | `client.promo.promo_release.GET(...)` |
 
 ---

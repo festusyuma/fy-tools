@@ -42,8 +42,6 @@ export type ParseRoute<UT, Path extends object = object> = UT extends string
   ? StripSlashes<UT> extends infer T
     ? T extends '' | undefined
       ? Path & { default: true }
-      : T extends `${infer L}-${infer R}`
-      ? ParseRoute<`${L}_${R}`, Path>
       : T extends `${infer L}:${infer R}`
       ? ParseRoute<`${L}$${R}`, Path>
       : T extends `${infer L}/${infer R}`
