@@ -52,12 +52,15 @@ export type Schema = typeof Schema;
 
 ### 2. Create the server
 
+Always assign the Elysia instance to a variable before passing it to `App` — see [TypeScript performance](#typescript-performance) for why this matters.
+
 ```ts
 import { App } from '@fy-tools/rpc-server-elysia';
 import { Elysia } from 'elysia';
 import { Schema } from './schema';
 
-const server = new App(new Elysia(), Schema);
+const elysia = new Elysia();
+const server = new App(elysia, Schema);
 ```
 
 ### 3. Add middleware
@@ -73,29 +76,32 @@ const authMiddleware = new Elysia({ name: 'auth' }).resolve(
   }
 );
 
-const server = new App(new Elysia(), Schema)
+const elysia = new Elysia();
+const server = new App(elysia, Schema)
   .build((app) => app.use(authMiddleware));
 ```
 
 ### 4. Implement handlers
 
-Access controllers via `.C` and routes via `.R`. For path encoding rules, see the [rpc-server README](../rpc-server/README.md#path-encoding).
+Extract each controller to a variable before accessing `.R`. This follows the same TypeScript caching principle as declaring the Elysia instance — TypeScript computes the controller type once at the declaration site rather than re-evaluating it on every route access. For path encoding rules, see the [rpc-server README](../rpc-server/README.md#path-encoding).
 
 ```ts
-server.C.auth.R.post_login.handler(async (ctx) => {
+const auth = server.C.auth;
+auth.R.login.POST.handler(async (ctx) => {
   const token = await authenticate(ctx.body.email, ctx.body.password);
   return { token };
 });
 
-server.C.users.R.get_default.handler(async (ctx) => {
+const users = server.C.users;
+users.R.default.GET.handler(async (ctx) => {
   return { items: await db.users.findAll({ userId: ctx.userId }) };
 });
 
-server.C.users.R.get_$id.handler(async (ctx) => {
+users.R.$id.GET.handler(async (ctx) => {
   return db.users.findById(ctx.params.id);
 });
 
-server.C.users.R.delete_$id.handler(async (ctx) => {
+users.R.$id.DELETE.handler(async (ctx) => {
   await db.users.delete(ctx.params.id);
 });
 ```
@@ -107,6 +113,36 @@ server.C.users.R.delete_$id.handler(async (ctx) => {
 ```ts
 server._app.listen(3000);
 ```
+
+---
+
+## TypeScript performance
+
+Elysia uses a 7-parameter generic type to track accumulated routes, plugins, and derived context. When a `new Elysia()` expression is passed **inline** to `App` or `Controller`, TypeScript must infer and expand all 7 parameters as part of the same constructor call — this produces noticeably slow completions as your app grows.
+
+Declaring the instance as a separate variable lets TypeScript compute and cache the type at the declaration site. Subsequent uses of that variable reference the cached type instead of re-evaluating the expression:
+
+```ts
+// Slow — Elysia type is inferred inline during the App constructor call
+const server = new App(new Elysia(), Schema);
+
+// Fast — TypeScript caches the type at the declaration site
+const elysia = new Elysia();
+const server = new App(elysia, Schema);
+```
+
+The same applies when using `Controller` directly:
+
+```ts
+// Slow
+const controller = new Controller(new Elysia(), controllerSchema);
+
+// Fast
+const elysia = new Elysia();
+const controller = new Controller(elysia, controllerSchema);
+```
+
+This is TypeScript's own caching behaviour, not specific to this library, but it is especially visible with Elysia because of how large its default type is.
 
 ---
 

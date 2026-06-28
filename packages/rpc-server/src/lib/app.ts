@@ -1,7 +1,10 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
-import type { Controller } from './controller.js';
-import { JsonType, ParseRoute, WithParsedRoute } from './types';
+import type {
+  AnyApp,
+  AnyController,
+  JsonType,
+  ParseRoute,
+  WithParsedRoute,
+} from './types';
 import { stripSlashes } from './util/strip-slashes';
 
 export class App<
@@ -13,7 +16,7 @@ export class App<
   _errors = {} as TE;
   _controllers = {} as T;
 
-  controller<TC extends Controller<any, any>>(controller: TC) {
+  controller<TC extends AnyController>(controller: TC) {
     type NewT = T & WithParsedRoute<ParseRoute<TC['_basePath']>, TC>;
     const app = this as unknown as App<NewT, TE>;
 
@@ -31,9 +34,9 @@ export class App<
     return app;
   }
 
-  app<TA extends App<Controller<any, any>[]>>(app: TA) {
+  app<TA extends AnyApp>(app: TA) {
     type NewT = T & TA['_controllers'];
-    let extendedApp = this as unknown as App<NewT, TE>;
+    let extendedApp = this as AnyApp;
 
     for (const i in app._controllers) {
       /**
@@ -44,7 +47,7 @@ export class App<
       extendedApp = extendedApp.controller(app._controllers[i]);
     }
 
-    return extendedApp;
+    return extendedApp as App<NewT, TE>;
   }
 
   error<Status extends number | 'default', Body extends JsonType>(

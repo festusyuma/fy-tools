@@ -189,30 +189,39 @@ HttpMethod.SEARCH  // 'search'
 
 Controllers and routes are addressed through a proxy that encodes path segments into valid JavaScript property keys. The same encoding is used by `@fy-tools/rpc-client`.
 
+### Path segment rules
+
 | Path element | Encoded form |
 |---|---|
-| `/` (path separator) | `___` (triple underscore) |
-| `-` (hyphen) | `__` (double underscore) |
+| `/` (path separator) | creates nesting — access via chained properties |
+| `-` (hyphen) | `_` (underscore) |
 | `:param` (URL parameter) | `$param` |
 | empty / root path | `default` |
 
-Route keys are prefixed with the HTTP method, joined by a single `_`:
+### Controller keys
 
-| Route definition | Encoded key |
+A controller is accessed via `App.C.<key>`. For controllers whose base path contains `/`, each segment becomes a chained property.
+
+| Base path | Access |
 |---|---|
-| `GET /` | `get_default` |
-| `POST /` | `post_default` |
-| `GET /stats/dashboard` | `get_stats___dashboard` |
-| `GET /:id` | `get_$id` |
-| `PUT /voucher-request` | `put_voucher__request` |
-| `POST /promo_release` | `post_promo_release` |
+| `'users'` | `C.users` |
+| `''` or `undefined` | `C.default` |
+| `'auth/custom'` | `C.auth.custom` |
+| `'auth-service'` | `C.auth_service` |
 
-A controller with no base path uses the key `default`:
+### Route keys
 
-```ts
-// Controller('') or Controller(undefined)
-client.default.get_default
-```
+Routes are accessed via `Controller.R.<path>.<METHOD>`. The path uses the same encoding rules as above; the HTTP method is always **uppercase** and accessed as the final property.
+
+| Route definition | Access on `.R` |
+|---|---|
+| `GET /` | `.R.default.GET` |
+| `POST /` | `.R.default.POST` |
+| `POST /login` | `.R.login.POST` |
+| `GET /stats/dashboard` | `.R.stats.dashboard.GET` |
+| `GET /:id` | `.R.$id.GET` |
+| `PUT /voucher-request` | `.R.voucher_request.PUT` |
+| `POST /promo_release` | `.R.promo_release.POST` |
 
 ---
 

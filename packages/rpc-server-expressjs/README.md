@@ -65,25 +65,29 @@ expressApp.use(express.json());
 const server = new App(expressApp, Schema);
 ```
 
+> **TypeScript tip:** Always assign `express()` to a named variable before passing it to `App` — as shown above. TypeScript caches the inferred type at the declaration site; passing `express()` inline forces re-evaluation on every completion request and slows down the IDE.
+
 ### 3. Implement handlers
 
-Access controllers via `.C` and routes via `.R`. For path encoding rules, see the [rpc-server README](../rpc-server/README.md#path-encoding).
+Extract each controller to a variable before accessing `.R` — TypeScript computes the controller type once at the declaration site rather than re-evaluating it on every route access. For path encoding rules, see the [rpc-server README](../rpc-server/README.md#path-encoding).
 
 ```ts
-server.C.auth.R.post_login.handler(async (ctx) => {
+const auth = server.C.auth;
+auth.R.login.POST.handler(async (ctx) => {
   const token = await authenticate(ctx.body.email, ctx.body.password);
   return { token };
 });
 
-server.C.users.R.get_default.handler(async (ctx) => {
+const users = server.C.users;
+users.R.default.GET.handler(async (ctx) => {
   return { items: await db.users.findAll() };
 });
 
-server.C.users.R.get_$id.handler(async (ctx) => {
+users.R.$id.GET.handler(async (ctx) => {
   return db.users.findById(ctx.params.id);
 });
 
-server.C.users.R.delete_$id.handler(async (ctx) => {
+users.R.$id.DELETE.handler(async (ctx) => {
   await db.users.delete(ctx.params.id);
 });
 ```

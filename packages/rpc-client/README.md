@@ -17,14 +17,14 @@ import type { Schema } from './schema';
 const client = rpcClient<Schema>({ baseURL: 'https://api.example.com' });
 
 // GET /users?page=1
-const res = await client.users.get_default({ query: { page: '1' } });
+const res = await client.users.default.GET({ query: { page: '1' } });
 // res.data → { items: [...], total: number }
 
 // POST /users
-const res = await client.users.post_default({ body: { email: 'a@b.com', name: 'Alice' } });
+const res = await client.users.default.POST({ body: { email: 'a@b.com', name: 'Alice' } });
 
 // GET /users/:id
-const res = await client.users.get_$id({ params: { id: '123' } });
+const res = await client.users.$id.GET({ params: { id: '123' } });
 ```
 
 ---
@@ -54,13 +54,13 @@ type RpcClientOptions = CreateAxiosDefaults & {
 
 ## Calling routes
 
-The client proxy has two levels:
+The client proxy mirrors the schema structure:
 
 ```
-client.<controller>.<route>(payload?, axiosOptions?)
+client.<controller>.<path>.<METHOD>(payload?, axiosOptions?)
 ```
 
-Both `<controller>` and `<route>` follow the [path encoding convention](#path-encoding).
+All segments follow the [path encoding convention](#path-encoding). The HTTP method is always the **last** property and is **uppercase**.
 
 ### Payload
 
@@ -74,16 +74,16 @@ Each call accepts a single typed payload object. Only the fields that are define
 
 ```ts
 // Route: POST /auth/login  (.body)
-client.auth.post_login({ body: { email: '...', password: '...' } });
+client.auth.login.POST({ body: { email: '...', password: '...' } });
 
 // Route: GET /redemption  (.query)
-client.redemption.get_default({ query: { page: '1', search: 'foo' } });
+client.redemption.default.GET({ query: { page: '1', search: 'foo' } });
 
 // Route: GET /users/:id  (.params)
-client.users.get_$id({ params: { id: 'abc123' } });
+client.users.$id.GET({ params: { id: 'abc123' } });
 
 // Route with both params and query
-client.posts.get_$id___comments({
+client.posts.$id.comments.GET({
   params: { id: '42' },
   query: { page: '1' },
 });
@@ -96,7 +96,7 @@ All calls return `Promise<AxiosResponse<R>>` where `R` is inferred from the rout
 An optional second argument accepts any Axios request config (except `method` and `data` which are set internally):
 
 ```ts
-client.users.get_default(
+client.users.default.GET(
   { query: { page: '1' } },
   { headers: { Authorization: 'Bearer ...' } }
 );
@@ -106,27 +106,27 @@ client.users.get_default(
 
 ## Path encoding
 
-Client property keys are encoded from route paths using this mapping:
+Client property keys are derived from the schema using these rules:
 
-| Path element | Encoded key |
+| Path element | Encoded form |
 |---|---|
-| `/` (path separator) | `___` (triple underscore) |
-| `-` (hyphen) | `__` (double underscore) |
+| `/` (path separator) | creates nesting — access via chained properties |
+| `-` (hyphen) | `_` (underscore) |
 | `:param` (URL param) | `$param` |
 | empty / root path | `default` |
 
-Route keys are prefixed with the lowercase HTTP method followed by `_`:
+The HTTP method is always **uppercase** and is the **last** property in the chain. The URL is reconstructed at call time by reversing the encoding and substituting `params` values.
 
-| Schema definition | Client key |
+| Schema definition | Client access |
 |---|---|
 | `Controller('auth')` | `client.auth` |
-| `Controller('auth/custom')` | `client.auth___custom` |
+| `Controller('auth/custom')` | `client.auth.custom` |
 | `Controller('')` or `Controller()` | `client.default` |
-| `Route('/', GET)` on `users` controller | `client.users.get_default` |
-| `Route('stats/dashboard', GET)` | `client.redemption.get_stats___dashboard` |
-| `Route(':id', GET)` | `client.users.get_$id` |
-| `Route('voucher-request', POST)` | `client.voucher.post_voucher__request` |
-| `Route('promo_release', GET)` | `client.promo_release.get_promo_release` |
+| `Route('/', GET)` on `users` | `client.users.default.GET(...)` |
+| `Route('stats/dashboard', GET)` | `client.stats.dashboard.GET(...)` |
+| `Route(':id', GET)` on `users` | `client.users.$id.GET(...)` |
+| `Route('voucher-request', POST)` | `client.voucher.voucher_request.POST(...)` |
+| `Route('promo_release', GET)` | `client.promo.promo_release.GET(...)` |
 
 ---
 
@@ -177,7 +177,7 @@ type ApiError = InferError<Schema>;
 // | AxiosError & { status: Exclude<HttpStatus, 400>; response: { data: { error: string } } }
 
 try {
-  await client.users.post_default({ body: { email: 'bad', name: '' } });
+  await client.users.default.POST({ body: { email: 'bad', name: '' } });
 } catch (e: unknown) {
   const err = e as ApiError;
   if (err.status === 400) {
@@ -263,13 +263,13 @@ client.axios.interceptors.request.use((config) => {
 
 // POST /auth/login
 export async function login(email: string, password: string) {
-  const res = await client.auth.post_login({ body: { email, password } });
+  const res = await client.auth.login.POST({ body: { email, password } });
   return res.data; // { access: string, refresh: string }
 }
 
 // GET /users?page=1&search=alice
 export async function listUsers(page = 1, search?: string) {
-  const res = await client.users.get_default({
+  const res = await client.users.default.GET({
     query: { page: String(page), search },
   });
   return res.data; // { items: [...], total: number }
@@ -277,7 +277,7 @@ export async function listUsers(page = 1, search?: string) {
 
 // GET /users/:id
 export async function getUser(id: string) {
-  const res = await client.users.get_$id({ params: { id } });
+  const res = await client.users.$id.GET({ params: { id } });
   return res.data; // { id: string, email: string }
 }
 ```

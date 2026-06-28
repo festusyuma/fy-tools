@@ -55,10 +55,12 @@ Pass `toJsonSchema` to enable automatic `@ApiBody`, `@ApiQuery`, `@ApiParam`, an
 
 A fully typed map of `Controller` instances keyed by the [encoded controller path](../rpc-server/README.md#path-encoding).
 
+Always extract the controller to a variable before using it. TypeScript caches the controller type at the declaration site, which keeps completions fast when accessing `.R` and its decorators.
+
 ```ts
-RpcApp.C.users          // Controller for 'users' base path
-RpcApp.C.auth___custom  // Controller for 'auth/custom' base path
-RpcApp.C.default        // Controller with no base path
+const users = RpcApp.C.users          // Controller for 'users' base path
+const authCustom = RpcApp.C.auth.custom  // Controller for 'auth/custom' base path
+const root = RpcApp.C.default         // Controller with no base path
 ```
 
 ---
@@ -72,8 +74,9 @@ Accessed via `App.C`. Do not instantiate directly.
 A NestJS class decorator. Apply it to your NestJS controller class. It emits `@Controller(basePath)` with the base path from the schema.
 
 ```ts
-@RpcApp.C.users.Controller
-@Controller() // ← do NOT add this; .Controller already applies it
+const usersController = RpcApp.C.users;
+
+@usersController.Controller
 export class UsersController { ... }
 ```
 
@@ -81,12 +84,14 @@ export class UsersController { ... }
 
 ### `controller.R`
 
-A fully typed map of `Route` instances keyed by the [encoded route key](../rpc-server/README.md#path-encoding).
+A fully typed map of `Route` instances. Access them via `R.<path>.<METHOD>` — see the [path encoding convention](../rpc-server/README.md#path-encoding).
 
 ```ts
-RpcApp.C.users.R.get_default    // GET /
-RpcApp.C.users.R.get_$id        // GET /:id
-RpcApp.C.users.R.post_default   // POST /
+const usersController = RpcApp.C.users;
+
+usersController.R.default.GET    // GET /
+usersController.R.$id.GET        // GET /:id
+usersController.R.default.POST   // POST /
 ```
 
 ---
@@ -104,7 +109,9 @@ A NestJS method decorator. Apply it to your handler method. It:
 - Emits Swagger decorators (`@ApiBody`, `@ApiQuery`, `@ApiParam`, `@ApiResponse`, `@ApiBearerAuth`) when `toJsonSchema` is configured and the route has the corresponding schemas.
 
 ```ts
-@RpcApp.C.users.R.get_$id.Handler
+const usersController = RpcApp.C.users;
+
+@usersController.R.$id.GET.Handler
 async getUser(...) { ... }
 ```
 
@@ -113,11 +120,13 @@ async getUser(...) { ... }
 A NestJS param decorator factory. Validates the request body against the route's body schema and injects the parsed value. Optionally accepts a key to extract a single property.
 
 ```ts
+const usersController = RpcApp.C.users;
+
 // Inject the full validated body
-async createUser(@RpcApp.C.users.R.post_default.Body() body: Body<...>) { ... }
+async createUser(@usersController.R.default.POST.Body() body: Body<...>) { ... }
 
 // Inject a single field
-async createUser(@RpcApp.C.users.R.post_default.Body('email') email: string) { ... }
+async createUser(@usersController.R.default.POST.Body('email') email: string) { ... }
 ```
 
 ### `route.Query`
@@ -125,8 +134,10 @@ async createUser(@RpcApp.C.users.R.post_default.Body('email') email: string) { .
 A NestJS param decorator factory. Validates the query string against the route's query schema and injects the parsed value. Accepts an optional key.
 
 ```ts
-async listUsers(@RpcApp.C.users.R.get_default.Query() query: Query<...>) { ... }
-async listUsers(@RpcApp.C.users.R.get_default.Query('page') page: number) { ... }
+const usersController = RpcApp.C.users;
+
+async listUsers(@usersController.R.default.GET.Query() query: Query<...>) { ... }
+async listUsers(@usersController.R.default.GET.Query('page') page: number) { ... }
 ```
 
 ### `route.Param`
@@ -134,8 +145,10 @@ async listUsers(@RpcApp.C.users.R.get_default.Query('page') page: number) { ... 
 A NestJS param decorator factory. Validates URL path parameters against the route's params schema and injects the parsed value. Accepts an optional key.
 
 ```ts
-async getUser(@RpcApp.C.users.R.get_$id.Param() params: Params<...>) { ... }
-async getUser(@RpcApp.C.users.R.get_$id.Param('id') id: string) { ... }
+const usersController = RpcApp.C.users;
+
+async getUser(@usersController.R.$id.GET.Param() params: Params<...>) { ... }
+async getUser(@usersController.R.$id.GET.Param('id') id: string) { ... }
 ```
 
 ---
@@ -220,24 +233,24 @@ import { Controller } from '@nestjs/common';
 import { RpcApp } from './rpc-app';
 import { UsersService } from './users.service';
 
-const C = RpcApp.C.users;
+const usersController = RpcApp.C.users;
 
-@C.Controller
+@usersController.Controller
 export class UsersController {
   constructor(private users: UsersService) {}
 
-  @C.R.post_default.Handler
-  async create(@C.R.post_default.Body() body: Body<typeof C.R.post_default._schema>) {
+  @usersController.R.default.POST.Handler
+  async create(@usersController.R.default.POST.Body() body: Body<typeof usersController.R.default.POST._schema>) {
     return this.users.create(body);
   }
 
-  @C.R.get_default.Handler
-  async list(@C.R.get_default.Query() query: Query<typeof C.R.get_default._schema>) {
+  @usersController.R.default.GET.Handler
+  async list(@usersController.R.default.GET.Query() query: Query<typeof usersController.R.default.GET._schema>) {
     return this.users.findAll(query);
   }
 
-  @C.R.get_$id.Handler
-  async getOne(@C.R.get_$id.Param('id') id: string) {
+  @usersController.R.$id.GET.Handler
+  async getOne(@usersController.R.$id.GET.Param('id') id: string) {
     return this.users.findById(id);
   }
 }
