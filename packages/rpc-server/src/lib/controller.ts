@@ -33,8 +33,6 @@ export class Controller<
         .replaceAll(':', '$')
     )}.${route._method.toUpperCase()}`;
 
-    console.log('full path :: ', fullPathKey);
-
     controller._routes = {
       ...this._routes,
       [fullPathKey]: route

@@ -95,7 +95,6 @@ export function createApiFactory<Error = AxiosError>(
 
           res = _res.data;
         } catch (_e) {
-          console.log({ _e });
           res = parseError(_e);
         }
 

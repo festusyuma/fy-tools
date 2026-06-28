@@ -49,6 +49,10 @@
           "commands": [
             "nx release version $VERSION-alpha.{args.tag} --git-commit=false --git-tag=false",
             {
+              "command": "nx run-many -t lint",
+              "forwardAllArgs": false
+            },
+            {
               "command": "nx run-many -t build",
               "forwardAllArgs": false
             },

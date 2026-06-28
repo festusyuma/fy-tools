@@ -1,5 +1,6 @@
 export function makeFlatProxy<T extends object>(targetObj: T) {
   function makeProxy(currentPath: any) {
+
     return new Proxy(
       {},
       {
