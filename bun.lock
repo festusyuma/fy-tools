@@ -45,7 +45,7 @@
     },
     "packages/rpc-client": {
       "name": "@fy-tools/rpc-client",
-      "version": "0.0.119-alpha.10407",
+      "version": "0.0.120",
       "dependencies": {
         "@standard-schema/spec": "^1.0.0",
         "axios": "^1.18.1",
@@ -57,7 +57,7 @@
     },
     "packages/rpc-client-nextjs": {
       "name": "@fy-tools/rpc-client-nextjs",
-      "version": "0.0.119-alpha.10407",
+      "version": "0.0.120",
       "dependencies": {
         "@fy-tools/rpc-client": "0.0.119-alpha.10407",
         "axios": "^1.18.1",
@@ -69,7 +69,7 @@
     },
     "packages/rpc-server": {
       "name": "@fy-tools/rpc-server",
-      "version": "0.0.119-alpha.10407",
+      "version": "0.0.120",
       "dependencies": {
         "@standard-schema/spec": "^1.0.0",
         "tslib": "^2.3.0",
@@ -77,7 +77,7 @@
     },
     "packages/rpc-server-elysia": {
       "name": "@fy-tools/rpc-server-elysia",
-      "version": "0.0.119-alpha.10407",
+      "version": "0.0.120",
       "dependencies": {
         "@fy-tools/rpc-server": "0.0.119-alpha.10401",
         "@standard-schema/spec": "^1.0.0",
@@ -87,7 +87,7 @@
     },
     "packages/rpc-server-expressjs": {
       "name": "@fy-tools/rpc-server-expressjs",
-      "version": "0.0.119-alpha.10407",
+      "version": "0.0.120",
       "dependencies": {
         "@fy-tools/rpc-server": "0.0.119-alpha.1038",
         "express": "^4.21.2",
@@ -102,7 +102,7 @@
     },
     "packages/rpc-server-nestjs": {
       "name": "@fy-tools/rpc-server-nestjs",
-      "version": "0.0.119-alpha.10407",
+      "version": "0.0.120",
       "dependencies": {
         "@fy-tools/rpc-server": "0.0.119-alpha.10407",
         "@nestjs/common": "^11.1.9",
@@ -1948,6 +1948,14 @@
     "@eslint-community/eslint-utils/eslint-visitor-keys": ["eslint-visitor-keys@3.4.3", "", {}, "sha512-wpc+LXeiyiisxPlEkUzU6svyS1frIO3Mgxj1fdy7Pm8Ygzguax2N3Fa/D/ag1WqbOprdI+uY6wMUl8/a2G+iag=="],
 
     "@eslint/eslintrc/globals": ["globals@14.0.0", "", {}, "sha512-oahGvuMGQlPw/ivIYBjVSrWAfWLBeku5tpPE2fOPLi+WHffIWbuh2tCjhyQhTBPMf5E9jDEH4FOmTYgYwbKwtQ=="],
+
+    "@fy-tools/examples/@fy-tools/rpc-client": ["@fy-tools/rpc-client@0.0.119-alpha.10407", "", { "dependencies": { "@standard-schema/spec": "^1.0.0", "axios": "^1.18.1", "tslib": "^2.3.0" }, "peerDependencies": { "@fy-tools/rpc-server": "0.0.119-alpha.10407" } }, "sha512-/Bdbn6Se7ZmJw1tv4EToiuySUNzoYPAtrta/nvexsjnGKE/zzniA0krpKVzIQ3Qt4EPfZkJWjGDg5LCe3CT4sQ=="],
+
+    "@fy-tools/examples/@fy-tools/rpc-client-nextjs": ["@fy-tools/rpc-client-nextjs@0.0.119-alpha.10407", "", { "dependencies": { "@fy-tools/rpc-client": "0.0.119-alpha.10407", "axios": "^1.18.1", "next": "16.2.9", "react-hot-toast": "2.5.2", "swr": "^2.4.1", "tslib": "^2.3.0" } }, "sha512-w9eZNQzCkpcIkN3yeGqf0oKqFDUbj1Vg5smhT/pi37bKtEkOU/FOgxlVHTRY+XNAJF+jqahFJ+eFBQVqgTi9gQ=="],
+
+    "@fy-tools/examples/@fy-tools/rpc-server": ["@fy-tools/rpc-server@0.0.119-alpha.10407", "", { "dependencies": { "@standard-schema/spec": "^1.0.0", "tslib": "^2.3.0" } }, "sha512-X0qM6VM9mYnvBtAkc0MRwifZXMleNH2k+kDoXzfpdr3PaDnb1uHbB4pEhcPF6Bqei0eE+ElmVMohl2HUvpMSYg=="],
+
+    "@fy-tools/examples/@fy-tools/rpc-server-nestjs": ["@fy-tools/rpc-server-nestjs@0.0.119-alpha.10407", "", { "dependencies": { "@fy-tools/rpc-server": "0.0.119-alpha.10407", "@nestjs/common": "^11.1.9", "@nestjs/swagger": "^11.2.3", "@standard-schema/spec": "^1.0.0", "tslib": "^2.3.0" } }, "sha512-bxVYI+xz2loknwggIKLpVO9IyV/qDGMjg7Jsww4BS4T2DJNmoer9vqOBsiQiXYN9/TdjZoGhI1Ha6cy3tXJMiA=="],
 
     "@humanfs/node/@humanwhocodes/retry": ["@humanwhocodes/retry@0.3.1", "", {}, "sha512-JBxkERygn7Bv/GbN5Rv8Ul6LVknS+5Bp6RgDC/O8gEBU/yeH5Ui5C/OlWrTb6qct7LjjfT6Re2NxB0ln0yYybA=="],
 
